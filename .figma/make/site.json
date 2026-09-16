@@ -1,0 +1,10 @@
+{
+  "description": "Streamlines e-commerce transactions by enabling seamless checkout, order management, payments, cancellations, and refunds for a smooth customer experience.",
+  "robots": {
+    "index": false
+  },
+  "accessibility": {
+    "addBypassLinks": false,
+    "ignoreReducedMotion": false
+  }
+}
