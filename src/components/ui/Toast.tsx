@@ -68,7 +68,12 @@ function ToastItem({ toast, onRemove }: { toast: Toast; onRemove: (id: string) =
   return (
     <div className="flex items-start gap-3 bg-white border border-slate-200 rounded-xl shadow-lg p-3.5 min-w-72 max-w-sm animate-slide-in">
       {icons[toast.type]}
-      <p className="text-sm text-slate-800 flex-1 leading-snug">{toast.message}</p>
+      <p
+        role={toast.type === 'error' ? 'alert' : 'status'}
+        className="text-sm text-slate-800 flex-1 leading-snug"
+      >
+        {toast.message}
+      </p>
       <button
         onClick={() => onRemove(toast.id)}
         className="text-slate-400 hover:text-slate-600 ml-1"

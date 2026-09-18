@@ -4,7 +4,7 @@ import { Input } from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 
 export default function RegisterPage() {
-  const { navigate, addToast } = useApp();
+  const { navigate, addToast, register } = useApp();
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -17,7 +17,7 @@ export default function RegisterPage() {
   function validate() {
     const errs: Record<string, string> = {};
     if (!form.name.trim()) errs.name = 'Name is required.';
-    if (!form.email.includes('@')) errs.email = 'Enter a valid email.';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())) errs.email = 'Enter a valid email.';
     if (form.password.length < 8) errs.password = 'Password must be at least 8 characters.';
     if (form.password !== form.confirm) errs.confirm = 'Passwords do not match.';
     return errs;
@@ -29,9 +29,13 @@ export default function RegisterPage() {
     setErrors(errs);
     if (Object.keys(errs).length) return;
     setLoading(true);
-    await new Promise((r) => setTimeout(r, 800));
+    const result = await register(form.name, form.email, form.password);
     setLoading(false);
-    addToast('Account created! Please sign in.', 'success');
+    if (!result.success) {
+      setErrors({ email: result.error ?? 'Registration failed.' });
+      return;
+    }
+    addToast('Demo account created! Please sign in.', 'success');
     navigate('login');
   }
 
@@ -75,8 +79,10 @@ export default function RegisterPage() {
             </span>
           </div>
           <h2 className="text-xl font-bold text-slate-900 mb-1">Create your account</h2>
-          <p className="text-sm text-slate-500 mb-6">Start shopping in minutes.</p>
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <p className="text-sm text-slate-500 mb-6">
+            Demo only: this account lasts until refresh. Use a demo password, not a real one.
+          </p>
+          <form noValidate onSubmit={handleSubmit} className="flex flex-col gap-4">
             <Input label="Full Name" placeholder="Alex Rivera" {...field('name')} />
             <Input
               label="Email Address"

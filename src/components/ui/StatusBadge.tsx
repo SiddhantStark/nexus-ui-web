@@ -30,6 +30,7 @@ const STATUS_CONFIG: Record<
     text: 'text-emerald-700',
     dot: 'bg-emerald-400',
   },
+  rejected: { label: 'Rejected', bg: 'bg-slate-100', text: 'text-slate-700', dot: 'bg-slate-400' },
   failed: {
     label: 'Failed',
     bg: 'bg-red-50',

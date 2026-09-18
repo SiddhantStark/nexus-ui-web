@@ -4,7 +4,7 @@ import EmptyState from '../../components/ui/EmptyState';
 import Breadcrumbs from '../../components/ui/Breadcrumbs';
 
 export default function CartPage() {
-  const { cart, removeFromCart, updateCartQuantity, cartTotal, navigate } = useApp();
+  const { cart, removeFromCart, updateCartQuantity, cartTotal, cartProblems, navigate } = useApp();
 
   if (cart.length === 0) {
     return (
@@ -49,6 +49,11 @@ export default function CartPage() {
         </span>
       </h1>
 
+      {cartProblems.map((message) => (
+        <p role="alert" key={message} className="text-red-600 mb-3">
+          {message}
+        </p>
+      ))}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Cart items */}
         <div className="lg:col-span-2 flex flex-col gap-3">
@@ -156,7 +161,12 @@ export default function CartPage() {
                 <span>${cartTotal.toFixed(2)}</span>
               </div>
             </div>
-            <Button fullWidth size="lg" onClick={() => navigate('checkout')}>
+            <Button
+              fullWidth
+              size="lg"
+              disabled={cartProblems.length > 0}
+              onClick={() => navigate('checkout')}
+            >
               Proceed to Checkout
             </Button>
             <button

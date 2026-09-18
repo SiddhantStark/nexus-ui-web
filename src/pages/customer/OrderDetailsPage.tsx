@@ -5,15 +5,8 @@ import StatusBadge from '../../components/ui/StatusBadge';
 import Breadcrumbs from '../../components/ui/Breadcrumbs';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
 import { Textarea } from '../../components/ui/Input';
-import type { Refund } from '../../types';
-
-function genId(prefix: string) {
-  return `${prefix}-${Math.floor(Math.random() * 9000) + 1000}`;
-}
-
 export default function OrderDetailsPage() {
-  const { navigate, orders, transactions, updateOrderStatus, addRefund, addToast, navigation } =
-    useApp();
+  const { navigate, orders, transactions, cancelOrder, requestRefund, navigation } = useApp();
   const orderId = navigation.params?.orderId;
   const order = orders.find((o) => o.id === orderId);
   const orderTx = transactions.find((t) => t.orderId === orderId && t.type === 'payment');
@@ -21,8 +14,6 @@ export default function OrderDetailsPage() {
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [showRefundDialog, setShowRefundDialog] = useState(false);
   const [refundReason, setRefundReason] = useState('');
-  const [cancelling, setCancelling] = useState(false);
-  const [requesting, setRequesting] = useState(false);
 
   if (!order) {
     return (
@@ -36,41 +27,14 @@ export default function OrderDetailsPage() {
   const canCancel = order.orderStatus === 'pending' || order.orderStatus === 'confirmed';
   const canRefund = order.orderStatus === 'cancelled' && order.paymentStatus === 'paid';
 
-  async function handleCancel() {
-    if (!order) return;
-    setCancelling(true);
-    await new Promise((r) => setTimeout(r, 1000));
-    updateOrderStatus(order.id, 'cancelled');
-    setShowCancelDialog(false);
-    setCancelling(false);
-    addToast('Order cancelled successfully', 'success');
+  function handleCancel() {
+    if (order && cancelOrder(order.id)) setShowCancelDialog(false);
   }
-
-  async function handleRefundRequest() {
-    if (!order) return;
-    if (!refundReason.trim()) {
-      addToast('Please provide a reason for the refund', 'warning');
-      return;
+  function handleRefundRequest() {
+    if (order && requestRefund(order.id, refundReason)) {
+      setShowRefundDialog(false);
+      setRefundReason('');
     }
-    setRequesting(true);
-    await new Promise((r) => setTimeout(r, 1000));
-    const refundId = genId('REF-2024');
-    const newRefund: Refund = {
-      id: refundId,
-      orderId: order.id,
-      customerId: order.customerId,
-      customerName: order.customerName,
-      amount: order.total,
-      status: 'pending',
-      requestedAt: new Date().toISOString(),
-      reason: refundReason,
-    };
-    addRefund(newRefund);
-    updateOrderStatus(order.id, 'cancelled', 'refund_pending');
-    setShowRefundDialog(false);
-    setRequesting(false);
-    setRefundReason('');
-    addToast('Refund request submitted. We will process it within 3-5 business days.', 'success');
   }
 
   return (
@@ -283,8 +247,8 @@ export default function OrderDetailsPage() {
       <ConfirmDialog
         open={showCancelDialog}
         title="Cancel this order?"
-        message={`Order ${order.id} will be cancelled. If payment was processed, a refund will be initiated automatically.`}
-        confirmLabel={cancelling ? 'Cancelling…' : 'Yes, Cancel Order'}
+        message={`Order ${order.id} will be cancelled. If payment was processed, a pending demo refund will be created automatically.`}
+        confirmLabel="Yes, Cancel Order"
         onConfirm={handleCancel}
         onCancel={() => setShowCancelDialog(false)}
       />
@@ -294,7 +258,7 @@ export default function OrderDetailsPage() {
         open={showRefundDialog}
         title="Request a refund?"
         message={`You are requesting a refund of $${order.total.toFixed(2)} for order ${order.id}. Please provide a reason below.`}
-        confirmLabel={requesting ? 'Submitting…' : 'Submit Refund Request'}
+        confirmLabel="Submit Refund Request"
         variant="primary"
         onConfirm={handleRefundRequest}
         onCancel={() => setShowRefundDialog(false)}

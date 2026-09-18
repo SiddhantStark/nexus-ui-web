@@ -1,4 +1,5 @@
 import { AppProvider, useApp } from './context/AppContext';
+import ToastContainer from './components/ui/Toast';
 import CustomerLayout from './components/layout/CustomerLayout';
 import AdminLayout from './components/layout/AdminLayout';
 
@@ -31,8 +32,8 @@ function Router() {
   const { page } = navigation;
 
   // Auth pages (no layout)
-  if (!currentUser || page === 'login') return <LoginPage />;
   if (page === 'register') return <RegisterPage />;
+  if (!currentUser || page === 'login') return <LoginPage />;
 
   // Admin pages
   if (page.startsWith('admin-')) {
@@ -67,6 +68,7 @@ export default function App() {
   return (
     <AppProvider>
       <Router />
+      <ToastContainer />
     </AppProvider>
   );
 }

@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Input } from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
-import ToastContainer from '../../components/ui/Toast';
 
 export default function LoginPage() {
   const { login, navigate } = useApp();
@@ -156,7 +155,6 @@ export default function LoginPage() {
           </p>
         </div>
       </div>
-      <ToastContainer />
     </div>
   );
 }

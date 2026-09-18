@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react';
 import Navbar from './Navbar';
-import ToastContainer from '../ui/Toast';
 
 export default function CustomerLayout({ children }: { children: ReactNode }) {
   return (
@@ -63,7 +62,6 @@ export default function CustomerLayout({ children }: { children: ReactNode }) {
           </div>
         </div>
       </footer>
-      <ToastContainer />
     </div>
   );
 }

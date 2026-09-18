@@ -3,12 +3,11 @@ import { useApp } from '../../context/AppContext';
 import StatusBadge from '../../components/ui/StatusBadge';
 import Pagination from '../../components/ui/Pagination';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
-import type { Transaction } from '../../types';
 
 const PER_PAGE = 8;
 
 export default function AdminRefundsPage() {
-  const { refunds, updateRefundStatus, updateOrderStatus, addTransaction, addToast } = useApp();
+  const { refunds, resolveRefund } = useApp();
   const [statusFilter, setStatusFilter] = useState('all');
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
@@ -31,31 +30,10 @@ export default function AdminRefundsPage() {
   const rejectRefund = refunds.find((r) => r.id === rejectTarget);
 
   function handleApprove() {
-    if (!approveRefund) return;
-    updateRefundStatus(approveRefund.id, 'completed');
-    updateOrderStatus(approveRefund.orderId, 'refunded', 'refunded');
-    const refundTx: Transaction = {
-      // eslint-disable-next-line react-hooks/purity -- Called only by the confirmation button event, never during render.
-      id: `TXN-${Date.now()}`,
-      orderId: approveRefund.orderId,
-      customerId: approveRefund.customerId,
-      customerName: approveRefund.customerName,
-      type: 'refund',
-      amount: approveRefund.amount,
-      status: 'success',
-      createdAt: new Date().toISOString(),
-      method: 'Original Payment Method',
-    };
-    addTransaction(refundTx);
-    addToast(`Refund of $${approveRefund.amount.toFixed(2)} processed successfully`, 'success');
-    setApproveTarget(null);
+    if (approveRefund && resolveRefund(approveRefund.id, 'completed')) setApproveTarget(null);
   }
-
   function handleReject() {
-    if (!rejectRefund) return;
-    updateRefundStatus(rejectRefund.id, 'failed');
-    addToast(`Refund request ${rejectRefund.id} rejected`, 'info');
-    setRejectTarget(null);
+    if (rejectRefund && resolveRefund(rejectRefund.id, 'rejected')) setRejectTarget(null);
   }
 
   const totalPending = refunds
@@ -74,7 +52,7 @@ export default function AdminRefundsPage() {
       </div>
 
       {/* Status counts */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
         {[
           {
             status: 'pending',
@@ -93,6 +71,12 @@ export default function AdminRefundsPage() {
             label: 'Completed',
             count: refunds.filter((r) => r.status === 'completed').length,
             color: 'bg-emerald-50 text-emerald-700 border-emerald-100',
+          },
+          {
+            status: 'rejected',
+            label: 'Rejected',
+            count: refunds.filter((r) => r.status === 'rejected').length,
+            color: 'bg-slate-100 text-slate-700 border-slate-200',
           },
           {
             status: 'failed',
@@ -222,8 +206,7 @@ export default function AdminRefundsPage() {
                   {refund.status === 'processing' && (
                     <button
                       onClick={() => {
-                        updateRefundStatus(refund.id, 'completed');
-                        addToast('Refund marked completed', 'success');
+                        resolveRefund(refund.id, 'completed');
                       }}
                       className="text-xs text-cyan-600 hover:text-cyan-800 font-medium px-2 py-1 hover:bg-cyan-50 rounded-lg transition-colors"
                     >
@@ -244,7 +227,7 @@ export default function AdminRefundsPage() {
       <ConfirmDialog
         open={!!approveTarget}
         title="Approve refund?"
-        message={`Process a refund of $${approveRefund?.amount.toFixed(2)} for ${approveRefund?.customerName}. This will trigger a transaction reversal.`}
+        message={`Process a refund of $${approveRefund?.amount.toFixed(2)} for ${approveRefund?.customerName}. This records a simulated reversal; no real money is moved.`}
         confirmLabel="Approve Refund"
         variant="primary"
         onConfirm={handleApprove}
@@ -254,7 +237,7 @@ export default function AdminRefundsPage() {
       <ConfirmDialog
         open={!!rejectTarget}
         title="Reject refund request?"
-        message={`Refund request ${rejectRefund?.id} for $${rejectRefund?.amount.toFixed(2)} will be rejected. The customer will be notified.`}
+        message={`Refund request ${rejectRefund?.id} for $${rejectRefund?.amount.toFixed(2)} will be rejected. The demo payment returns to paid; no message is sent.`}
         confirmLabel="Reject Request"
         variant="danger"
         onConfirm={handleReject}

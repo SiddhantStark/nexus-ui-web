@@ -36,7 +36,7 @@ Use `pnpm` below, or `corepack pnpm` if pnpm is not on your PATH.
 
 Run formatting, lint, typecheck, tests, and build before submitting changes. The formatter covers source, project configuration, and frontend setup documentation. It excludes generated output, Figma-managed files, and the imported design brief. oxfmt was updated from 0.2.0 after that version was verified to remove required separators in inline TypeScript types.
 
-ESLint 9 is temporarily retained because eslint-plugin-jsx-a11y 6.10.2 declares peer support only through ESLint 9. npm marks ESLint 9 deprecated; upgrade to a supported ESLint major when the accessibility plugin supports it. One line-level React purity suppression documents a false positive: the refund timestamp is generated only in a confirmation-button handler, not during render. No rules are disabled globally.
+ESLint 9 is temporarily retained because eslint-plugin-jsx-a11y 6.10.2 declares peer support only through ESLint 9. npm marks ESLint 9 deprecated; upgrade to a supported ESLint major when the accessibility plugin supports it. No rules are disabled globally.
 
 ## Tests
 
@@ -50,7 +50,7 @@ Place `*.test.ts` or `*.test.tsx` beside the component/feature being tested. Imp
 
 Use `renderWithApp` from `src/test/renderWithApp.tsx` for components requiring the existing AppProvider. It creates a fresh provider under StrictMode and returns a user-event session alongside Testing Library's render result. Use plain Testing Library `render` for provider-independent controls. Avoid shared mutable fixtures, snapshots of whole pages, and assertions on CSS classes/internal state. Await user interactions and assert visible outcomes.
 
-Initial coverage checks product-card/cart integration, out-of-stock behavior, and confirmation/cancellation actions. Regression tests for registration, checkout, stock limits, and refund transitions will accompany their Phase 3 fixes. These DOM tests do not verify real-browser layout, keyboard focus trapping, or complete commerce workflows; browser coverage remains later work. Testing setup follows [Vitest configuration](https://vitest.dev/guide/index.html) and [Testing Library setup](https://testing-library.com/docs/react-testing-library/setup/).
+Initial coverage checks product-card/cart integration, out-of-stock behavior, and confirmation/cancellation actions. Regression tests cover registration, checkout failures/unmounts, stock limits, cancellation, refund rejection/completion, and repeated actions. These DOM tests do not verify real-browser layout, keyboard focus trapping, or complete commerce workflows; browser coverage remains later work. Testing setup follows [Vitest configuration](https://vitest.dev/guide/index.html) and [Testing Library setup](https://testing-library.com/docs/react-testing-library/setup/).
 
 ## Demo accounts and limitations
 
@@ -59,7 +59,17 @@ Initial coverage checks product-card/cart integration, out-of-stock behavior, an
 | Customer | customer@nexuscommerce.com | password123 |
 | Admin    | admin@nexuscommerce.com    | admin123    |
 
-These are public demo credentials, not real accounts. Refresh resets the session, cart, product edits, orders, transactions, and refunds. Registration currently does not create a user and its signed-out route is broken. Checkout/payment/refund outcomes are simulated. Do not enter real card information. Frontend role/ownership enforcement remains scheduled work.
+These are public demo credentials, not real accounts. Refresh resets the session, cart, product edits, orders, transactions, and refunds. Registration creates a customer account for the current mounted app session only. Emails are normalized and duplicates rejected. New accounts disappear on refresh; passwords are never written to browser storage. Checkout/payment/refund outcomes are simulated. Do not enter real card information. Frontend role/ownership enforcement remains scheduled work.
+
+## Demo commerce behavior
+
+Cart additions and quantity changes validate current catalog availability and whole-number quantities. If inventory is reduced or a product is disabled, affected cart items show an error and checkout is blocked until corrected or removed.
+
+Checkout is explicitly simulated: it collects delivery information but no card details. A successful attempt updates inventory, orders, payment transactions, and cart together. Repeated submissions cannot duplicate that attempt. Leaving the checkout screen during processing cancels it. Editing the cart/catalog during processing requires a new attempt.
+
+Outcome selectors are shown in Vite development mode, or when explicitly building with `VITE_DEMO_MODE=true`. A normal production build hides them but remains a demo; it does not become a real payment application. Example: `VITE_DEMO_MODE=true pnpm build`. Do not put secrets in Vite environment variables.
+
+Paid cancellations restore stock once and create a pending refund. Admin approval and completion share one operation that updates the refund, order, and reversal transaction. Rejection/failure returns payment to paid without creating a reversal; a fresh request may then be made. See [demo transition table](docs/demo-transitions.md) for the rules and fixture assumptions. Demo operations enforce their role/ownership checks, but complete route-level access controls remain Phase 4 work.
 
 ## Structure and baseline
 

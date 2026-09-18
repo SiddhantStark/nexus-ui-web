@@ -8,7 +8,7 @@ import Modal from '../../components/ui/Modal';
 const PER_PAGE = 8;
 
 export default function AdminOrdersPage() {
-  const { orders, updateOrderStatus, addToast } = useApp();
+  const { orders, confirmOrder, cancelOrder } = useApp();
   const [search, setSearch] = useState('');
   const [orderStatusFilter, setOrderStatusFilter] = useState('all');
   const [paymentStatusFilter, setPaymentStatusFilter] = useState('all');
@@ -226,8 +226,7 @@ export default function AdminOrdersPage() {
                 <Button
                   size="sm"
                   onClick={() => {
-                    updateOrderStatus(viewOrder.id, 'confirmed', 'paid');
-                    addToast(`Order ${viewOrder.id} confirmed`, 'success');
+                    confirmOrder(viewOrder.id);
                     setDetailOrder(null);
                   }}
                 >
@@ -237,8 +236,7 @@ export default function AdminOrdersPage() {
                   size="sm"
                   variant="danger"
                   onClick={() => {
-                    updateOrderStatus(viewOrder.id, 'cancelled');
-                    addToast(`Order ${viewOrder.id} cancelled`, 'info');
+                    cancelOrder(viewOrder.id);
                     setDetailOrder(null);
                   }}
                 >

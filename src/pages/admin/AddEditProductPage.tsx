@@ -7,7 +7,7 @@ import Breadcrumbs from '../../components/ui/Breadcrumbs';
 const CATEGORIES = ['Electronics', 'Accessories', 'Footwear', 'Home & Kitchen', 'Sports', 'Books'];
 
 export default function AddEditProductPage() {
-  const { navigate, products, addProduct, updateProduct, addToast, navigation } = useApp();
+  const { navigate, products, addProduct, updateProduct, navigation } = useApp();
   const productId = navigation.params?.productId;
   const existing = products.find((p) => p.id === productId);
   const isEdit = !!existing;
@@ -43,26 +43,25 @@ export default function AddEditProductPage() {
     if (Object.keys(errs).length) return;
     setSaving(true);
     await new Promise((r) => setTimeout(r, 700));
+    let saved: boolean;
     if (isEdit && existing) {
-      updateProduct({
+      saved = updateProduct({
         ...existing,
         ...form,
         price: Number(form.price),
         stock: Number(form.stock),
       });
-      addToast('Product updated successfully', 'success');
     } else {
-      addProduct({
+      saved = addProduct({
         id: `prod-${Date.now()}`,
         ...form,
         price: Number(form.price),
         stock: Number(form.stock),
         specs: {},
       });
-      addToast('Product added successfully', 'success');
     }
     setSaving(false);
-    navigate('admin-products');
+    if (saved) navigate('admin-products');
   }
 
   const field = (key: keyof typeof form) => ({

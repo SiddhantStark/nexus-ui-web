@@ -2,7 +2,7 @@ export type OrderStatus = 'pending' | 'confirmed' | 'cancelled' | 'refunded';
 export type PaymentStatus = 'pending' | 'paid' | 'failed' | 'refund_pending' | 'refunded';
 export type TransactionType = 'payment' | 'refund';
 export type TransactionStatus = 'pending' | 'success' | 'failed';
-export type RefundStatus = 'pending' | 'processing' | 'completed' | 'failed';
+export type RefundStatus = 'pending' | 'processing' | 'completed' | 'failed' | 'rejected';
 
 export interface Product {
   id: string;

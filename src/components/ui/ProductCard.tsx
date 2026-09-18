@@ -7,15 +7,14 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-  const { navigate, addToCart, addToast } = useApp();
-  const outOfStock = product.stock === 0;
+  const { navigate, addToCart } = useApp();
+  const outOfStock = !product.active || product.stock <= 0;
   const lowStock = product.stock > 0 && product.stock <= 5;
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (outOfStock) return;
     addToCart(product);
-    addToast(`${product.name} added to cart`, 'success');
   };
 
   return (

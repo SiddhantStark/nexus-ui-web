@@ -1,25 +1,27 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import Button from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import Breadcrumbs from '../../components/ui/Breadcrumbs';
-import type { Order, Transaction } from '../../types';
+import type { Scenario } from '../../demo/commerce';
 
-type CheckoutStep = 'form' | 'processing' | 'success' | 'payment-failed' | 'inventory-error';
-type PaymentMethod = 'credit-card' | 'simulated';
-type TestScenario = 'success' | 'payment-failed' | 'inventory-error';
+const SHOW_SCENARIOS = import.meta.env.DEV || import.meta.env.VITE_DEMO_MODE === 'true';
 
-function genId(prefix: string) {
-  return `${prefix}-${Math.floor(Math.random() * 9000) + 1000}`;
-}
+type CheckoutStep = 'form' | 'processing';
 
 export default function CheckoutPage() {
-  const { cart, cartTotal, clearCart, currentUser, addOrder, addTransaction, navigate, addToast } =
+  const { cart, cartTotal, cartVersion, cartProblems, currentUser, checkout, navigate, addToast } =
     useApp();
   const [step, setStep] = useState<CheckoutStep>('form');
-  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('credit-card');
-  const [testScenario, setTestScenario] = useState<TestScenario>('success');
-  const [placedOrder, setPlacedOrder] = useState<Order | null>(null);
+  const [testScenario, setTestScenario] = useState<Scenario>('success');
+  const [checkoutError, setCheckoutError] = useState('');
+  const pending = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(
+    () => () => {
+      if (pending.current) clearTimeout(pending.current);
+    },
+    [],
+  );
 
   const [form, setForm] = useState({
     name: currentUser?.name ?? '',
@@ -29,11 +31,6 @@ export default function CheckoutPage() {
     city: '',
     state: '',
     postalCode: '',
-  });
-  const [cardForm, setCardForm] = useState({
-    number: '4242 4242 4242 4242',
-    expiry: '12/26',
-    cvv: '123',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
 
@@ -49,68 +46,32 @@ export default function CheckoutPage() {
     return errs;
   }
 
-  async function handlePlaceOrder() {
+  function handlePlaceOrder() {
+    if (pending.current) return;
     const errs = validate();
     setErrors(errs);
     if (Object.keys(errs).length) {
       addToast('Please fill in all required fields', 'error');
       return;
     }
-
+    if (cartProblems.length) {
+      setCheckoutError(cartProblems.join(' '));
+      return;
+    }
+    const version = cartVersion;
+    const attempt = crypto.randomUUID();
+    setCheckoutError('');
     setStep('processing');
-    await new Promise((r) => setTimeout(r, 2200));
-
-    if (testScenario === 'inventory-error') {
-      setStep('inventory-error');
-      return;
-    }
-    if (testScenario === 'payment-failed') {
-      setStep('payment-failed');
-      return;
-    }
-
-    // Success
-    const orderId = genId('ORD-2024');
-    const txnId = genId('TXN-2024');
-
-    const newOrder: Order = {
-      id: orderId,
-      customerId: currentUser?.id ?? 'usr-001',
-      customerName: form.name,
-      customerEmail: form.email,
-      items: cart.map((i) => ({
-        productId: i.product.id,
-        productName: i.product.name,
-        imageUrl: i.product.imageUrl,
-        quantity: i.quantity,
-        price: i.product.price,
-      })),
-      total: cartTotal,
-      orderStatus: 'confirmed',
-      paymentStatus: 'paid',
-      createdAt: new Date().toISOString(),
-      deliveryAddress: { ...form },
-      transactionId: txnId,
-      paymentMethod: paymentMethod === 'credit-card' ? 'Credit Card' : 'Simulated Payment',
-    };
-
-    const newTx: Transaction = {
-      id: txnId,
-      orderId,
-      customerId: currentUser?.id ?? 'usr-001',
-      customerName: form.name,
-      type: 'payment',
-      amount: cartTotal,
-      status: 'success',
-      createdAt: new Date().toISOString(),
-      method: paymentMethod === 'credit-card' ? 'Credit Card' : 'Simulated Payment',
-    };
-
-    addOrder(newOrder);
-    addTransaction(newTx);
-    setPlacedOrder(newOrder);
-    clearCart();
-    setStep('success');
+    pending.current = setTimeout(() => {
+      pending.current = null;
+      const result = checkout(form, version, attempt, SHOW_SCENARIOS ? testScenario : 'success');
+      if (result.success) {
+        navigate('order-success', { order: result.value });
+      } else {
+        setCheckoutError(result.error);
+        setStep('form');
+      }
+    }, 800);
   }
 
   const field = (key: keyof typeof form) => ({
@@ -136,7 +97,7 @@ export default function CheckoutPage() {
         <div className="w-16 h-16 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
         <div className="text-center">
           <h2 className="text-xl font-bold text-slate-900 mb-1">Processing your order</h2>
-          <p className="text-sm text-slate-500">Verifying inventory and processing payment…</p>
+          <p className="text-sm text-slate-500">Checking demo inventory and simulating payment…</p>
         </div>
         <div className="flex flex-col gap-2 text-xs text-slate-400">
           <div className="flex items-center gap-2">
@@ -145,7 +106,7 @@ export default function CheckoutPage() {
           </div>
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 bg-indigo-400 rounded-full animate-pulse" />
-            Processing payment securely
+            Simulating payment — no real charge
           </div>
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 bg-slate-300 rounded-full" />
@@ -154,99 +115,6 @@ export default function CheckoutPage() {
         </div>
       </div>
     );
-  }
-
-  // Inventory error
-  if (step === 'inventory-error') {
-    return (
-      <div className="min-h-[70vh] flex items-center justify-center px-6">
-        <div className="max-w-md w-full bg-white rounded-2xl border border-slate-100 shadow-sm p-8 text-center animate-fade-in">
-          <div className="w-16 h-16 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto mb-5">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              className="w-8 h-8 text-amber-500"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"
-              />
-            </svg>
-          </div>
-          <h2 className="text-xl font-bold text-slate-900 mb-2">Inventory Unavailable</h2>
-          <p className="text-sm text-slate-600 mb-2">
-            One or more items in your order are no longer available in the requested quantity.
-          </p>
-          <div className="bg-amber-50 border border-amber-100 rounded-lg p-3 mb-6 text-sm text-amber-700 text-left">
-            <p className="font-medium mb-1">Affected item(s):</p>
-            {cart.map((i) => (
-              <p key={i.product.id} className="text-xs">
-                · {i.product.name} — requested {i.quantity}, available 0
-              </p>
-            ))}
-          </div>
-          <div className="flex flex-col gap-2">
-            <Button fullWidth onClick={() => navigate('cart')}>
-              Update Cart
-            </Button>
-            <Button variant="outline" fullWidth onClick={() => navigate('products')}>
-              Browse Products
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Payment failed
-  if (step === 'payment-failed') {
-    return (
-      <div className="min-h-[70vh] flex items-center justify-center px-6">
-        <div className="max-w-md w-full bg-white rounded-2xl border border-slate-100 shadow-sm p-8 text-center animate-fade-in">
-          <div className="w-16 h-16 bg-red-50 rounded-2xl flex items-center justify-center mx-auto mb-5">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              className="w-8 h-8 text-red-500"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </div>
-          <h2 className="text-xl font-bold text-slate-900 mb-2">Payment Failed</h2>
-          <p className="text-sm text-slate-600 mb-2">
-            We were unable to process your payment. Your card was not charged.
-          </p>
-          <div className="bg-red-50 border border-red-100 rounded-lg p-3 mb-6 text-sm text-red-700 text-left">
-            <p className="font-medium mb-1">Possible reasons:</p>
-            <ul className="text-xs space-y-0.5">
-              <li>· Card declined by issuing bank</li>
-              <li>· Insufficient funds</li>
-              <li>· Incorrect card details</li>
-              <li>· Card blocked for online transactions</li>
-            </ul>
-          </div>
-          <div className="flex flex-col gap-2">
-            <Button fullWidth onClick={() => setStep('form')}>
-              Try Again
-            </Button>
-            <Button variant="outline" fullWidth onClick={() => navigate('home')}>
-              Cancel
-            </Button>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  // Success — redirect to order success
-  if (step === 'success' && placedOrder) {
-    navigate('order-success', { order: placedOrder });
-    return null;
   }
 
   // Main checkout form
@@ -259,7 +127,17 @@ export default function CheckoutPage() {
           { label: 'Checkout' },
         ]}
       />
-      <h1 className="text-2xl font-bold text-slate-900 mb-6">Checkout</h1>
+      <h1 className="text-2xl font-bold text-slate-900 mb-6">Demo Checkout</h1>
+      {checkoutError && (
+        <p role="alert" className="text-red-600 mb-4">
+          {checkoutError}
+        </p>
+      )}
+      {cartProblems.map((message) => (
+        <p role="alert" key={message} className="text-red-600 mb-3">
+          {message}
+        </p>
+      ))}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Left: Delivery + Payment */}
@@ -299,111 +177,43 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          {/* Payment method */}
           <div className="bg-white border border-slate-100 rounded-xl p-6">
-            <h2 className="font-semibold text-slate-900 mb-4 flex items-center gap-2">
-              <span className="w-6 h-6 bg-indigo-600 text-white text-xs font-bold rounded-full flex items-center justify-center">
-                2
-              </span>
-              Payment Method
-            </h2>
-            <div className="flex flex-col gap-3 mb-4">
-              {(
-                [
-                  {
-                    id: 'credit-card',
-                    label: 'Credit / Debit Card',
-                    icon: '💳',
-                    desc: 'Visa, Mastercard, Amex',
-                  },
-                  {
-                    id: 'simulated',
-                    label: 'Simulated Payment',
-                    icon: '⚡',
-                    desc: 'Demo payment — no real charge',
-                  },
-                ] as {
-                  id: PaymentMethod;
-                  label: string;
-                  icon: string;
-                  desc: string;
-                }[]
-              ).map((opt) => (
-                <label
-                  key={opt.id}
-                  className={`flex items-center gap-3 p-4 rounded-xl border-2 cursor-pointer transition-colors ${
-                    paymentMethod === opt.id
-                      ? 'border-indigo-500 bg-indigo-50/60'
-                      : 'border-slate-200 hover:border-slate-300'
-                  }`}
-                >
-                  <input
-                    type="radio"
-                    name="paymentMethod"
-                    value={opt.id}
-                    checked={paymentMethod === opt.id}
-                    onChange={() => setPaymentMethod(opt.id)}
-                    className="accent-indigo-600"
-                  />
-                  <span className="text-xl">{opt.icon}</span>
-                  <div>
-                    <p className="text-sm font-semibold text-slate-900">{opt.label}</p>
-                    <p className="text-xs text-slate-500">{opt.desc}</p>
-                  </div>
-                </label>
-              ))}
-            </div>
-
-            {paymentMethod === 'credit-card' && (
-              <div className="bg-slate-50 rounded-xl p-4 flex flex-col gap-3">
-                <Input
-                  label="Card Number"
-                  value={cardForm.number}
-                  onChange={(e) => setCardForm((p) => ({ ...p, number: e.target.value }))}
-                />
-                <div className="grid grid-cols-2 gap-3">
-                  <Input
-                    label="Expiry (MM/YY)"
-                    value={cardForm.expiry}
-                    onChange={(e) => setCardForm((p) => ({ ...p, expiry: e.target.value }))}
-                  />
-                  <Input
-                    label="CVV"
-                    value={cardForm.cvv}
-                    onChange={(e) => setCardForm((p) => ({ ...p, cvv: e.target.value }))}
-                  />
-                </div>
-              </div>
-            )}
+            <h2 className="font-semibold text-slate-900 mb-4">Simulated Payment</h2>
+            <p className="text-sm text-slate-600">
+              Demo only. No card details are collected and no real charge is made. All orders reset
+              on refresh.
+            </p>
           </div>
 
           {/* Test scenario selector */}
-          <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-            <p className="text-xs font-semibold text-amber-700 mb-2">
-              🧪 Demo: Choose checkout outcome
-            </p>
-            <div className="flex gap-2 flex-wrap">
-              {(
-                [
-                  { id: 'success', label: '✓ Success' },
-                  { id: 'payment-failed', label: '✗ Payment Failed' },
-                  { id: 'inventory-error', label: '⚠ Inventory Error' },
-                ] as { id: TestScenario; label: string }[]
-              ).map((s) => (
-                <button
-                  key={s.id}
-                  onClick={() => setTestScenario(s.id)}
-                  className={`text-xs px-3 py-1.5 rounded-lg font-medium border transition-colors ${
-                    testScenario === s.id
-                      ? 'bg-amber-600 text-white border-amber-600'
-                      : 'bg-white text-amber-700 border-amber-300 hover:bg-amber-100'
-                  }`}
-                >
-                  {s.label}
-                </button>
-              ))}
+          {SHOW_SCENARIOS && (
+            <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
+              <p className="text-xs font-semibold text-amber-700 mb-2">
+                🧪 Demo: Choose checkout outcome
+              </p>
+              <div className="flex gap-2 flex-wrap">
+                {(
+                  [
+                    { id: 'success', label: '✓ Success' },
+                    { id: 'payment-failed', label: '✗ Payment Failed' },
+                    { id: 'inventory-error', label: '⚠ Inventory Error' },
+                  ] as { id: Scenario; label: string }[]
+                ).map((s) => (
+                  <button
+                    key={s.id}
+                    onClick={() => setTestScenario(s.id)}
+                    className={`text-xs px-3 py-1.5 rounded-lg font-medium border transition-colors ${
+                      testScenario === s.id
+                        ? 'bg-amber-600 text-white border-amber-600'
+                        : 'bg-white text-amber-700 border-amber-300 hover:bg-amber-100'
+                    }`}
+                  >
+                    {s.label}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
         </div>
 
         {/* Order Summary */}
@@ -446,8 +256,13 @@ export default function CheckoutPage() {
                 <span>${cartTotal.toFixed(2)}</span>
               </div>
             </div>
-            <Button fullWidth size="lg" onClick={handlePlaceOrder}>
-              Place Order · ${cartTotal.toFixed(2)}
+            <Button
+              fullWidth
+              size="lg"
+              disabled={cartProblems.length > 0}
+              onClick={handlePlaceOrder}
+            >
+              Place Demo Order · ${cartTotal.toFixed(2)}
             </Button>
             <div className="mt-3 flex items-center justify-center gap-1.5 text-xs text-slate-400">
               <svg

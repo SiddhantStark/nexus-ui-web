@@ -39,7 +39,7 @@ export default function OrderSuccessPage() {
         <p className="text-slate-600">
           {'Thank you, '}
           <strong>{order.customerName.split(' ')[0]}</strong>
-          {'! Your order has been placed and payment confirmed.'}
+          {'! Your demo order has been placed. Payment was simulated; no real charge was made.'}
         </p>
       </div>
 
@@ -151,7 +151,7 @@ export default function OrderSuccessPage() {
       </div>
 
       <p className="text-center text-xs text-slate-400 mt-5">
-        A confirmation email has been sent to <strong>{order.customerEmail}</strong>
+        Demo receipt for <strong>{order.customerEmail}</strong>. No email was sent.
       </p>
     </div>
   );

@@ -5,7 +5,7 @@ import Breadcrumbs from '../../components/ui/Breadcrumbs';
 import ProductCard from '../../components/ui/ProductCard';
 
 export default function ProductDetailsPage() {
-  const { navigate, products, addToCart, addToast, navigation } = useApp();
+  const { navigate, products, addToCart, navigation } = useApp();
   const productId = navigation.params?.productId;
   const product = products.find((p) => p.id === productId);
   const related = products
@@ -25,19 +25,17 @@ export default function ProductDetailsPage() {
     );
   }
 
-  const outOfStock = product.stock === 0;
+  const outOfStock = !product.active || product.stock <= 0;
   const lowStock = !outOfStock && product.stock <= 5;
 
   function handleAddToCart() {
     if (!product) return;
     addToCart(product, qty);
-    addToast(`${qty}× ${product.name} added to cart`, 'success');
   }
 
   function handleBuyNow() {
     if (!product) return;
-    addToCart(product, qty);
-    navigate('checkout');
+    if (addToCart(product, qty)) navigate('checkout');
   }
 
   return (

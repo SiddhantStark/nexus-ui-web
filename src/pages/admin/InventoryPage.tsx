@@ -31,16 +31,20 @@ export default function InventoryPage() {
   });
 
   async function handleUpdateStock() {
-    if (!editTarget || !delta || isNaN(Number(delta))) return;
+    if (!editTarget) return;
+    if (!Number.isInteger(Number(delta)) || Number(delta) <= 0) {
+      addToast('Enter a positive whole number.', 'error');
+      return;
+    }
     const product = products.find((p) => p.id === editTarget.id);
     if (!product) return;
     setSaving(true);
     await new Promise((r) => setTimeout(r, 500));
     const change = Number(delta);
     const newStock = mode === 'add' ? product.stock + change : Math.max(0, product.stock - change);
-    updateProduct({ ...product, stock: newStock });
-    addToast(`Stock updated: ${product.name} → ${newStock} units`, 'success');
+    const saved = updateProduct({ ...product, stock: newStock });
     setSaving(false);
+    if (!saved) return;
     setEditTarget(null);
     setDelta('');
   }
