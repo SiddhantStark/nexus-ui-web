@@ -34,9 +34,23 @@ Use `pnpm` below, or `corepack pnpm` if pnpm is not on your PATH.
 | `pnpm build`        | Typecheck, then create the production bundle in `dist/`  |
 | `pnpm preview`      | Serve an existing production build on port 8443          |
 
-Run formatting, lint, typecheck, and build before submitting changes. Tests will be introduced in Phase 2 of the improvement plan. The formatter covers source, project configuration, and frontend setup documentation. It excludes generated output, Figma-managed files, and the imported design brief. oxfmt was updated from 0.2.0 after that version was verified to remove required separators in inline TypeScript types.
+Run formatting, lint, typecheck, tests, and build before submitting changes. The formatter covers source, project configuration, and frontend setup documentation. It excludes generated output, Figma-managed files, and the imported design brief. oxfmt was updated from 0.2.0 after that version was verified to remove required separators in inline TypeScript types.
 
 ESLint 9 is temporarily retained because eslint-plugin-jsx-a11y 6.10.2 declares peer support only through ESLint 9. npm marks ESLint 9 deprecated; upgrade to a supported ESLint major when the accessibility plugin supports it. One line-level React purity suppression documents a false positive: the refund timestamp is generated only in a confirmation-button handler, not during render. No rules are disabled globally.
+
+## Tests
+
+- `pnpm test`: run all component/unit tests once; failures return a nonzero exit code.
+- `pnpm test:watch`: rerun affected tests while developing; press `q` to quit.
+- `pnpm test src/components/ui/ProductCard.test.tsx`: run one test file.
+
+Vitest uses its own `vitest.config.ts`, React transforms, the `@` alias, and jsdom. It does not load the Figma preview plugins. jsdom 26 retains compatibility with the documented Node range; newer jsdom releases require higher Node patch versions.
+
+Place `*.test.ts` or `*.test.tsx` beside the component/feature being tested. Import `describe`, `it`, `expect`, and `vi` explicitly from Vitest. `src/test/setup.ts` installs jest-dom assertions, cleans up mounted components after each test, restores real timers, and stubs the scrolling API missing from jsdom. Vitest clears/restores mocks between tests.
+
+Use `renderWithApp` from `src/test/renderWithApp.tsx` for components requiring the existing AppProvider. It creates a fresh provider under StrictMode and returns a user-event session alongside Testing Library's render result. Use plain Testing Library `render` for provider-independent controls. Avoid shared mutable fixtures, snapshots of whole pages, and assertions on CSS classes/internal state. Await user interactions and assert visible outcomes.
+
+Initial coverage checks product-card/cart integration, out-of-stock behavior, and confirmation/cancellation actions. Regression tests for registration, checkout, stock limits, and refund transitions will accompany their Phase 3 fixes. These DOM tests do not verify real-browser layout, keyboard focus trapping, or complete commerce workflows; browser coverage remains later work. Testing setup follows [Vitest configuration](https://vitest.dev/guide/index.html) and [Testing Library setup](https://testing-library.com/docs/react-testing-library/setup/).
 
 ## Demo accounts and limitations
 
@@ -60,4 +74,6 @@ See [screen baseline](../docs/frontend-screen-baseline.md) and the [step-by-step
 
 ## Repository boundary
 
-During setup, `git rev-parse --show-toplevel` resolved to `/Users/siddhantprasad/Desktop`, not NexusCommerce. Check this before staging changes. Select an intentional project repository root before making commits; avoid staging unrelated Desktop files. No repository was initialized or changed by the frontend tooling work.
+Verified on 2026-09-16: the frontend has its own repository rooted at `NexusCommerce/nexus-frontend`, with initial commit `6efb43c` (`first commit`). Run Git commands from this directory and verify the root with `git rev-parse --show-toplevel` before staging.
+
+The parent `NexusCommerce` folder, sibling backend, and shared `../docs/` files are outside this repository and still resolve to the Desktop repository. The documentation links above work in the current workspace, but those shared documents are not included in a standalone frontend clone. No parent-repository changes are needed for frontend commits.

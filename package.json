@@ -7,11 +7,13 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "format": "oxfmt --write \"src/**/*.{ts,tsx,css}\" vite.config.ts eslint.config.js package.json tsconfig.json .oxfmtrc.json README.md AGENTS.md",
+    "format": "oxfmt --write \"src/**/*.{ts,tsx,css}\" vite.config.ts vitest.config.ts eslint.config.js package.json tsconfig.json .oxfmtrc.json README.md AGENTS.md",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . --max-warnings 0",
     "lint:fix": "eslint . --fix --max-warnings 0",
-    "format:check": "oxfmt --check \"src/**/*.{ts,tsx,css}\" vite.config.ts eslint.config.js package.json tsconfig.json .oxfmtrc.json README.md AGENTS.md"
+    "format:check": "oxfmt --check \"src/**/*.{ts,tsx,css}\" vite.config.ts vitest.config.ts eslint.config.js package.json tsconfig.json .oxfmtrc.json README.md AGENTS.md",
+    "test": "vitest run",
+    "test:watch": "vitest --watch"
   },
   "dependencies": {
     "react": "^19.0.0",
@@ -20,6 +22,9 @@
   "devDependencies": {
     "@eslint/js": "^9.39.5",
     "@tailwindcss/vite": "^4.0.0",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
+    "@testing-library/user-event": "^14.6.7",
     "@types/node": "^22.0.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
@@ -28,11 +33,13 @@
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^16.5.0",
+    "jsdom": "^26.1.0",
     "oxfmt": "^0.68.0",
     "tailwindcss": "^4.0.0",
     "typescript": "^5.7.0",
     "typescript-eslint": "^8.70.0",
-    "vite": "^8.0.5"
+    "vite": "^8.0.5",
+    "vitest": "^5.0.1"
   },
   "engines": {
     "node": "^22.12.0 || ^24.0.0",

@@ -36,10 +36,14 @@ This project uses **Tailwind CSS v4** through the `@tailwindcss/vite` plugin con
 
 ## Commands
 
-Use pnpm 10.34.3 and the single pnpm lockfile. Install with `pnpm install --frozen-lockfile`. Run `pnpm format:check`, `pnpm lint`, `pnpm typecheck`, and `pnpm build` before completing code changes. `pnpm build` checks TypeScript before bundling. Formatting targets source and JS/TS config; Figma-managed files are excluded. See README.md for runtime prerequisites and demo limitations.
+Use pnpm 10.34.3 and the single pnpm lockfile. Install with `pnpm install --frozen-lockfile`. Run `pnpm format:check`, `pnpm lint`, `pnpm typecheck`, `pnpm test`, and `pnpm build` before completing code changes. `pnpm build` checks TypeScript before bundling. Formatting targets source and JS/TS config; Figma-managed files are excluded. See README.md for runtime prerequisites and demo limitations.
 
 ## Code quality
 
 - Use double quotes for strings containing apostrophes (`"We're here to help"`), or escape them in single-quoted strings. An unescaped apostrophe in a single-quoted string breaks the build.
 - Ensure JSX tags are closed and braces are balanced.
 - Export components as default exports.
+
+## Testing
+
+Vitest uses a separate `vitest.config.ts` with jsdom and `src/test/setup.ts`. Colocate `*.test.ts(x)` with the tested feature. Use `src/test/renderWithApp.tsx` when the real demo provider is required; each render starts fresh. Import Vitest APIs explicitly and assert user-visible behavior. Run `pnpm test` for a single pass or `pnpm test:watch` while developing. Add regression coverage with the later behavior fixes rather than encoding known bugs as expected behavior.
