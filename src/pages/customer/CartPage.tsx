@@ -1,21 +1,22 @@
+import LinkButton from '../../components/ui/LinkButton';
+import { Link } from 'react-router';
 import { useApp } from '../../context/AppContext';
-import Button from '../../components/ui/Button';
 import EmptyState from '../../components/ui/EmptyState';
 import Breadcrumbs from '../../components/ui/Breadcrumbs';
 
 export default function CartPage() {
-  const { cart, removeFromCart, updateCartQuantity, cartTotal, cartProblems, navigate } = useApp();
+  const { cart, removeFromCart, updateCartQuantity, cartTotal, cartProblems } = useApp();
 
   if (cart.length === 0) {
     return (
       <div className="max-w-7xl mx-auto px-6 py-8">
-        <Breadcrumbs crumbs={[{ label: 'Home', page: 'home' }, { label: 'Cart' }]} />
+        <Breadcrumbs crumbs={[{ label: 'Home', to: '/' }, { label: 'Cart' }]} />
         <EmptyState
           title="Your cart is empty"
           description="Browse our products and add items to your cart to get started."
           action={{
             label: 'Start Shopping',
-            onClick: () => navigate('products'),
+            to: '/products',
           }}
           icon={
             <svg
@@ -41,7 +42,7 @@ export default function CartPage() {
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-8 animate-fade-in">
-      <Breadcrumbs crumbs={[{ label: 'Home', page: 'home' }, { label: 'Cart' }]} />
+      <Breadcrumbs crumbs={[{ label: 'Home', to: '/' }, { label: 'Cart' }]} />
       <h1 className="text-2xl font-bold text-slate-900 mb-6">
         Shopping Cart{' '}
         <span className="text-slate-400 font-normal text-lg">
@@ -62,17 +63,16 @@ export default function CartPage() {
               key={item.product.id}
               className="bg-white border border-slate-100 rounded-xl p-4 flex items-start gap-4 hover:shadow-sm transition-shadow"
             >
-              <button
-                type="button"
+              <Link
                 className="w-20 h-20 rounded-lg overflow-hidden bg-slate-50 shrink-0 cursor-pointer"
-                onClick={() => navigate('product-detail', { productId: item.product.id })}
+                to={`/products/${encodeURIComponent(item.product.id)}`}
               >
                 <img
                   src={item.product.imageUrl}
                   alt={item.product.name}
                   className="w-full h-full object-cover"
                 />
-              </button>
+              </Link>
               <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-2">
                   <div>
@@ -161,20 +161,15 @@ export default function CartPage() {
                 <span>${cartTotal.toFixed(2)}</span>
               </div>
             </div>
-            <Button
-              fullWidth
-              size="lg"
-              disabled={cartProblems.length > 0}
-              onClick={() => navigate('checkout')}
-            >
+            <LinkButton fullWidth size="lg" disabled={cartProblems.length > 0} to={'/checkout'}>
               Proceed to Checkout
-            </Button>
-            <button
-              onClick={() => navigate('products')}
+            </LinkButton>
+            <Link
+              to={'/products'}
               className="w-full text-center text-sm text-slate-500 hover:text-indigo-600 mt-3 transition-colors"
             >
               Continue Shopping
-            </button>
+            </Link>
             <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-center gap-2 text-xs text-slate-400">
               <svg
                 viewBox="0 0 24 24"

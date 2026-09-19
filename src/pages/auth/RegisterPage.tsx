@@ -1,10 +1,13 @@
+import { Link, useLocation, useNavigate } from 'react-router';
 import { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Input } from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 
 export default function RegisterPage() {
-  const { navigate, addToast, register } = useApp();
+  const navigate = useNavigate();
+  const { search } = useLocation();
+  const { addToast, register } = useApp();
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -36,7 +39,7 @@ export default function RegisterPage() {
       return;
     }
     addToast('Demo account created! Please sign in.', 'success');
-    navigate('login');
+    navigate('/login' + search);
   }
 
   const field = (key: keyof typeof form) => ({
@@ -49,8 +52,8 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen bg-slate-50 flex items-center justify-center p-8">
       <div className="w-full max-w-md">
-        <button
-          onClick={() => navigate('login')}
+        <Link
+          to={'/login' + search}
           className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-900 mb-8 transition-colors"
         >
           <svg
@@ -63,7 +66,7 @@ export default function RegisterPage() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
           </svg>
           Back to sign in
-        </button>
+        </Link>
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 p-8">
           <div className="flex items-center gap-2 mb-6">
             <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
@@ -108,12 +111,9 @@ export default function RegisterPage() {
           </form>
           <p className="text-sm text-center text-slate-500 mt-5">
             Already have an account?{' '}
-            <button
-              onClick={() => navigate('login')}
-              className="text-indigo-600 font-medium hover:underline"
-            >
+            <Link to={'/login' + search} className="text-indigo-600 font-medium hover:underline">
               Sign in
-            </button>
+            </Link>
           </p>
         </div>
       </div>

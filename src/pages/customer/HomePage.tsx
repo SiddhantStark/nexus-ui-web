@@ -1,3 +1,4 @@
+import { Link } from 'react-router';
 import { useApp } from '../../context/AppContext';
 import ProductCard from '../../components/ui/ProductCard';
 
@@ -41,7 +42,7 @@ const CATEGORIES = [
 ];
 
 export default function HomePage() {
-  const { navigate, products } = useApp();
+  const { products } = useApp();
   const featured = products.filter((p) => p.active).slice(0, 4);
   const popular = products.filter((p) => p.active && p.stock > 0).slice(4, 8);
 
@@ -75,18 +76,18 @@ export default function HomePage() {
               hassle-free returns.
             </p>
             <div className="flex flex-col sm:flex-row gap-3 justify-center md:justify-start">
-              <button
-                onClick={() => navigate('products')}
+              <Link
+                to={'/products'}
                 className="bg-white text-indigo-700 font-semibold px-8 py-3.5 rounded-xl hover:bg-indigo-50 transition-colors shadow-lg"
               >
                 Shop Now
-              </button>
-              <button
-                onClick={() => navigate('my-orders')}
+              </Link>
+              <Link
+                to={'/orders'}
                 className="border border-white/30 text-white font-semibold px-8 py-3.5 rounded-xl hover:bg-white/10 transition-colors"
               >
                 Track Orders
-              </button>
+              </Link>
             </div>
           </div>
           <div className="hidden md:grid grid-cols-2 gap-3 shrink-0">
@@ -94,14 +95,13 @@ export default function HomePage() {
               .filter((p) => p.stock > 0)
               .slice(0, 4)
               .map((p) => (
-                <button
-                  type="button"
+                <Link
                   key={p.id}
                   className="w-36 h-36 rounded-2xl overflow-hidden shadow-xl border-2 border-white/20 hover:scale-105 transition-transform cursor-pointer"
-                  onClick={() => navigate('product-detail', { productId: p.id })}
+                  to={`/products/${encodeURIComponent(p.id)}`}
                 >
                   <img src={p.imageUrl} alt={p.name} className="w-full h-full object-cover" />
-                </button>
+                </Link>
               ))}
           </div>
         </div>
@@ -128,24 +128,21 @@ export default function HomePage() {
         <section className="py-12">
           <div className="flex items-center justify-between mb-6">
             <h2 className="text-2xl font-bold text-slate-900">Browse Categories</h2>
-            <button
-              onClick={() => navigate('products')}
-              className="text-sm text-indigo-600 font-medium hover:underline"
-            >
+            <Link to={'/products'} className="text-sm text-indigo-600 font-medium hover:underline">
               View all →
-            </button>
+            </Link>
           </div>
           <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
             {CATEGORIES.map(({ name, emoji, count, color }) => (
-              <button
+              <Link
                 key={name}
-                onClick={() => navigate('products', { category: name })}
+                to={`/products?${new URLSearchParams({ category: name })}`}
                 className={`flex flex-col items-center gap-2 p-4 rounded-xl border font-medium text-sm transition-all hover:shadow-md hover:scale-105 ${color}`}
               >
                 <span className="text-2xl">{emoji}</span>
                 <span className="leading-none">{name}</span>
                 <span className="text-xs opacity-60">{count} items</span>
-              </button>
+              </Link>
             ))}
           </div>
         </section>
@@ -157,12 +154,9 @@ export default function HomePage() {
               <h2 className="text-2xl font-bold text-slate-900">Featured Products</h2>
               <p className="text-sm text-slate-500 mt-0.5">Handpicked for you this week</p>
             </div>
-            <button
-              onClick={() => navigate('products')}
-              className="text-sm text-indigo-600 font-medium hover:underline"
-            >
+            <Link to={'/products'} className="text-sm text-indigo-600 font-medium hover:underline">
               See all →
-            </button>
+            </Link>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {featured.map((p) => (
@@ -182,12 +176,12 @@ export default function HomePage() {
                   Top-rated products across all categories
                 </p>
               </div>
-              <button
-                onClick={() => navigate('products')}
+              <Link
+                to={'/products'}
                 className="bg-indigo-600 text-white px-6 py-2.5 rounded-xl font-medium text-sm hover:bg-indigo-500 transition-colors shrink-0"
               >
                 Explore All
-              </button>
+              </Link>
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">

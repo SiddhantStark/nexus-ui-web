@@ -1,3 +1,5 @@
+import LinkButton from '../../components/ui/LinkButton';
+import { useParams, useNavigate } from 'react-router';
 import { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import Button from '../../components/ui/Button';
@@ -5,9 +7,10 @@ import Breadcrumbs from '../../components/ui/Breadcrumbs';
 import ProductCard from '../../components/ui/ProductCard';
 
 export default function ProductDetailsPage() {
-  const { navigate, products, addToCart, navigation } = useApp();
-  const productId = navigation.params?.productId;
-  const product = products.find((p) => p.id === productId);
+  const navigate = useNavigate();
+  const { products, addToCart } = useApp();
+  const { productId } = useParams();
+  const product = products.find((p) => p.id === productId && p.active);
   const related = products
     .filter((p) => p.id !== productId && p.category === product?.category && p.active)
     .slice(0, 4);
@@ -17,10 +20,10 @@ export default function ProductDetailsPage() {
   if (!product) {
     return (
       <div className="max-w-7xl mx-auto px-6 py-20 text-center">
-        <p className="text-slate-500">Product not found.</p>
-        <Button className="mt-4" onClick={() => navigate('products')}>
+        <h1 className="text-slate-500">Product not found.</h1>
+        <LinkButton className="mt-4" to={'/products'}>
           Browse Products
-        </Button>
+        </LinkButton>
       </div>
     );
   }
@@ -35,15 +38,15 @@ export default function ProductDetailsPage() {
 
   function handleBuyNow() {
     if (!product) return;
-    if (addToCart(product, qty)) navigate('checkout');
+    if (addToCart(product, qty)) navigate('/checkout');
   }
 
   return (
     <div className="max-w-7xl mx-auto px-6 py-8 animate-fade-in">
       <Breadcrumbs
         crumbs={[
-          { label: 'Home', page: 'home' },
-          { label: 'Products', page: 'products' },
+          { label: 'Home', to: '/' },
+          { label: 'Products', to: '/products' },
           { label: product.name },
         ]}
       />

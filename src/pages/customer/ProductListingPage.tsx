@@ -1,4 +1,5 @@
-import { useState, useMemo } from 'react';
+import { useSearchParams } from 'react-router';
+import { useEffect, useMemo } from 'react';
 import { useApp } from '../../context/AppContext';
 import ProductCard from '../../components/ui/ProductCard';
 import { Select } from '../../components/ui/Input';
@@ -23,13 +24,31 @@ const SORT_OPTIONS = [
 const PER_PAGE = 8;
 
 export default function ProductListingPage() {
-  const { products, navigation } = useApp();
-  const initCategory = navigation.params?.category ?? 'All';
-  const [search, setSearch] = useState('');
-  const [category, setCategory] = useState(initCategory);
-  const [priceMax, setPriceMax] = useState('');
-  const [sort, setSort] = useState('name-asc');
-  const [page, setPage] = useState(1);
+  const { products } = useApp();
+  const [params, setParams] = useSearchParams();
+  const search = params.get('q') ?? '';
+  const category = CATEGORIES.includes(params.get('category') ?? '')
+    ? params.get('category')!
+    : 'All';
+  const sort = SORT_OPTIONS.some((option) => option.value === params.get('sort'))
+    ? params.get('sort')!
+    : 'name-asc';
+  const rawPrice = params.get('maxPrice') ?? '';
+  const priceMax =
+    rawPrice !== '' && Number.isFinite(Number(rawPrice)) && Number(rawPrice) >= 0 ? rawPrice : '';
+  const requestedPage = Number(params.get('page') ?? 1);
+  function updateQuery(key: string, value: string, replace = false) {
+    const next = new URLSearchParams(params);
+    if (value) next.set(key, value);
+    else next.delete(key);
+    if (key !== 'page') next.delete('page');
+    setParams(next, { replace });
+  }
+  const setSearch = (value: string) => updateQuery('q', value, true);
+  const setCategory = (value: string) => updateQuery('category', value === 'All' ? '' : value);
+  const setPriceMax = (value: string) => updateQuery('maxPrice', value, true);
+  const setSort = (value: string) => updateQuery('sort', value === 'name-asc' ? '' : value);
+  const setPage = (value: number) => updateQuery('page', value === 1 ? '' : String(value));
 
   const filtered = useMemo(() => {
     let result = products.filter((p) => p.active);
@@ -51,14 +70,27 @@ export default function ProductListingPage() {
   }, [products, search, category, priceMax, sort]);
 
   const totalPages = Math.ceil(filtered.length / PER_PAGE);
+  const page = Math.min(
+    Math.max(1, totalPages),
+    Number.isSafeInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1,
+  );
+  useEffect(() => {
+    const normalized = new URLSearchParams(params);
+    for (const [key, value] of Object.entries({
+      category: category === 'All' ? '' : category,
+      sort: sort === 'name-asc' ? '' : sort,
+      maxPrice: priceMax,
+      page: page === 1 ? '' : String(page),
+    })) {
+      if (value) normalized.set(key, value);
+      else normalized.delete(key);
+    }
+    if (normalized.toString() !== params.toString()) setParams(normalized, { replace: true });
+  }, [category, sort, priceMax, page, params, setParams]);
   const paginated = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
   function resetFilters() {
-    setSearch('');
-    setCategory('All');
-    setPriceMax('');
-    setSort('name-asc');
-    setPage(1);
+    setParams({});
   }
 
   return (
@@ -87,11 +119,11 @@ export default function ProductListingPage() {
           </svg>
           <input
             type="text"
+            aria-label="Search products"
             placeholder="Search products…"
             value={search}
             onChange={(e) => {
               setSearch(e.target.value);
-              setPage(1);
             }}
             className="w-full pl-9 pr-3 py-2.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400"
           />
@@ -99,10 +131,10 @@ export default function ProductListingPage() {
 
         {/* Category */}
         <select
+          aria-label="Category"
           value={category}
           onChange={(e) => {
             setCategory(e.target.value);
-            setPage(1);
           }}
           className="px-3 py-2.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 bg-white"
         >
@@ -114,17 +146,22 @@ export default function ProductListingPage() {
         {/* Price */}
         <input
           type="number"
+          aria-label="Maximum price"
           placeholder="Max price $"
           value={priceMax}
           onChange={(e) => {
             setPriceMax(e.target.value);
-            setPage(1);
           }}
           className="w-32 px-3 py-2.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400"
         />
 
         {/* Sort */}
-        <Select value={sort} onChange={(e) => setSort(e.target.value)} className="min-w-40">
+        <Select
+          aria-label="Sort products"
+          value={sort}
+          onChange={(e) => setSort(e.target.value)}
+          className="min-w-40"
+        >
           {SORT_OPTIONS.map((o) => (
             <option key={o.value} value={o.value}>
               {o.label}
@@ -149,7 +186,6 @@ export default function ProductListingPage() {
             key={c}
             onClick={() => {
               setCategory(c);
-              setPage(1);
             }}
             className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
               category === c

@@ -48,7 +48,7 @@ Vitest uses its own `vitest.config.ts`, React transforms, the `@` alias, and jsd
 
 Place `*.test.ts` or `*.test.tsx` beside the component/feature being tested. Import `describe`, `it`, `expect`, and `vi` explicitly from Vitest. `src/test/setup.ts` installs jest-dom assertions, cleans up mounted components after each test, restores real timers, and stubs the scrolling API missing from jsdom. Vitest clears/restores mocks between tests.
 
-Use `renderWithApp` from `src/test/renderWithApp.tsx` for components requiring the existing AppProvider. It creates a fresh provider under StrictMode and returns a user-event session alongside Testing Library's render result. Use plain Testing Library `render` for provider-independent controls. Avoid shared mutable fixtures, snapshots of whole pages, and assertions on CSS classes/internal state. Await user interactions and assert visible outcomes.
+Use `renderWithApp` from `src/test/renderWithApp.tsx` for components requiring the existing AppProvider. It creates a fresh provider inside MemoryRouter under StrictMode and returns a user-event session alongside Testing Library's render result. Use plain Testing Library `render` for provider-independent controls. Avoid shared mutable fixtures, snapshots of whole pages, and assertions on CSS classes/internal state. Await user interactions and assert visible outcomes.
 
 Initial coverage checks product-card/cart integration, out-of-stock behavior, and confirmation/cancellation actions. Regression tests cover registration, checkout failures/unmounts, stock limits, cancellation, refund rejection/completion, and repeated actions. These DOM tests do not verify real-browser layout, keyboard focus trapping, or complete commerce workflows; browser coverage remains later work. Testing setup follows [Vitest configuration](https://vitest.dev/guide/index.html) and [Testing Library setup](https://testing-library.com/docs/react-testing-library/setup/).
 
@@ -59,7 +59,7 @@ Initial coverage checks product-card/cart integration, out-of-stock behavior, an
 | Customer | customer@nexuscommerce.com | password123 |
 | Admin    | admin@nexuscommerce.com    | admin123    |
 
-These are public demo credentials, not real accounts. Refresh resets the session, cart, product edits, orders, transactions, and refunds. Registration creates a customer account for the current mounted app session only. Emails are normalized and duplicates rejected. New accounts disappear on refresh; passwords are never written to browser storage. Checkout/payment/refund outcomes are simulated. Do not enter real card information. Frontend role/ownership enforcement remains scheduled work.
+These are public demo credentials, not real accounts. Refresh resets the session, cart, product edits, orders, transactions, and refunds. Registration creates a customer account for the current mounted app session only. Emails are normalized and duplicates rejected. New accounts disappear on refresh; passwords are never written to browser storage. Checkout/payment/refund outcomes are simulated. Do not enter real card information. Routes enforce demo sign-in, admin roles, and customer order ownership. These frontend checks are not a backend security boundary.
 
 ## Demo commerce behavior
 
@@ -69,18 +69,29 @@ Checkout is explicitly simulated: it collects delivery information but no card d
 
 Outcome selectors are shown in Vite development mode, or when explicitly building with `VITE_DEMO_MODE=true`. A normal production build hides them but remains a demo; it does not become a real payment application. Example: `VITE_DEMO_MODE=true pnpm build`. Do not put secrets in Vite environment variables.
 
-Paid cancellations restore stock once and create a pending refund. Admin approval and completion share one operation that updates the refund, order, and reversal transaction. Rejection/failure returns payment to paid without creating a reversal; a fresh request may then be made. See [demo transition table](docs/demo-transitions.md) for the rules and fixture assumptions. Demo operations enforce their role/ownership checks, but complete route-level access controls remain Phase 4 work.
+Paid cancellations restore stock once and create a pending refund. Admin approval and completion share one operation that updates the refund, order, and reversal transaction. Rejection/failure returns payment to paid without creating a reversal; a fresh request may then be made. See [demo transition table](docs/demo-transitions.md) for the rules and fixture assumptions. Demo operations and routes enforce their role/ownership checks.
+
+## URL routing
+
+See [route behavior and verification](docs/routing.md) for the route map and manual checks. Login and registration are public. Store pages require sign-in; `/admin/*` additionally requires the admin role. Product/order URLs contain record IDs. Missing records and other customers' orders show a not-found message.
+
+Sign-in preserves a permitted internal destination in `next`; registration links retain it. Catalog URLs support `q`, `category`, `maxPrice`, `sort`, and `page`. Category, sort, and page changes create history entries; typing search/price replaces the current entry. Invalid filters fall back to defaults and page numbers are clamped to available results.
+
+A refresh or new tab resets the in-memory demo session/data and prompts for sign-in before returning to the requested URL. Newly created records disappear on refresh. Production hosting must serve `index.html` for application paths; hosting rewrite configuration is deferred to deployment. Vite development/preview supports SPA fallback. The router derives its base pathname from Vite's base URL, including Figma preview URLs.
+
+Routing regression tests cover direct links, registration redirects, ownership, role guards, sign-out, browser history, missing records, query normalization, and safe post-login destinations. Layout and full browser workflow coverage remain separate from DOM tests.
 
 ## Structure and baseline
 
-- `src/App.tsx`: current in-memory page switch.
+- `src/App.tsx`: BrowserRouter, demo provider, and toast composition.
+- `src/app/router.tsx`: nested route tree, sign-in/admin guards, and route error screens.
 - `src/pages/{auth,customer,admin}`: application screens.
 - `src/components/{layout,ui}`: layouts and shared controls.
 - `src/context/AppContext.tsx`: current shared demo state.
 - `src/data/mockData.ts` and `src/types/index.ts`: fixtures and frontend types.
 - `src/index.css`: global styles and Tailwind entrypoint.
 
-See [screen baseline](../docs/frontend-screen-baseline.md) and the [step-by-step improvement plan](../docs/frontend-improvement-plan.md). Folder moves, URL routing, and API integration are not part of Phase 1.
+See [screen baseline](../docs/frontend-screen-baseline.md) and the [step-by-step improvement plan](../docs/frontend-improvement-plan.md). Feature folder reorganization is Phase 5; APIs and DTOs remain deferred.
 
 ## Repository boundary
 

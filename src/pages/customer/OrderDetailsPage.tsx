@@ -1,3 +1,5 @@
+import LinkButton from '../../components/ui/LinkButton';
+import { useParams } from 'react-router';
 import { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import Button from '../../components/ui/Button';
@@ -6,9 +8,9 @@ import Breadcrumbs from '../../components/ui/Breadcrumbs';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
 import { Textarea } from '../../components/ui/Input';
 export default function OrderDetailsPage() {
-  const { navigate, orders, transactions, cancelOrder, requestRefund, navigation } = useApp();
-  const orderId = navigation.params?.orderId;
-  const order = orders.find((o) => o.id === orderId);
+  const { orders, currentUser, transactions, cancelOrder, requestRefund } = useApp();
+  const { orderId } = useParams();
+  const order = orders.find((o) => o.id === orderId && o.customerId === currentUser?.id);
   const orderTx = transactions.find((t) => t.orderId === orderId && t.type === 'payment');
 
   const [showCancelDialog, setShowCancelDialog] = useState(false);
@@ -18,8 +20,8 @@ export default function OrderDetailsPage() {
   if (!order) {
     return (
       <div className="max-w-5xl mx-auto px-6 py-20 text-center">
-        <p className="text-slate-500 mb-4">Order not found.</p>
-        <Button onClick={() => navigate('my-orders')}>Back to Orders</Button>
+        <h1 className="text-slate-500 mb-4">Order not found.</h1>
+        <LinkButton to={'/orders'}>Back to Orders</LinkButton>
       </div>
     );
   }
@@ -41,8 +43,8 @@ export default function OrderDetailsPage() {
     <div className="max-w-4xl mx-auto px-6 py-8 animate-fade-in">
       <Breadcrumbs
         crumbs={[
-          { label: 'Home', page: 'home' },
-          { label: 'My Orders', page: 'my-orders' },
+          { label: 'Home', to: '/' },
+          { label: 'My Orders', to: '/orders' },
           { label: order.id },
         ]}
       />
@@ -70,9 +72,9 @@ export default function OrderDetailsPage() {
             </Button>
           )}
           {orderTx && (
-            <Button variant="secondary" size="sm" onClick={() => navigate('transactions')}>
+            <LinkButton variant="secondary" size="sm" to={'/transactions'}>
               View Transaction
-            </Button>
+            </LinkButton>
           )}
         </div>
       </div>

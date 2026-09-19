@@ -1,8 +1,9 @@
+import { Link } from 'react-router';
 import { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 
 export default function Navbar() {
-  const { navigate, currentUser, logout, cartCount } = useApp();
+  const { currentUser, logout, cartCount } = useApp();
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -11,10 +12,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <button
-            onClick={() => navigate('home')}
-            className="flex items-center gap-2 focus:outline-none"
-          >
+          <Link to={'/'} className="flex items-center gap-2 focus:outline-none">
             <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
               <svg viewBox="0 0 24 24" fill="white" className="w-5 h-5">
                 <path d="M3.375 4.5C2.339 4.5 1.5 5.34 1.5 6.375V13.5h12V6.375c0-1.036-.84-1.875-1.875-1.875h-8.25zM13.5 15h-12v2.625c0 1.035.84 1.875 1.875 1.875H5.25a3.375 3.375 0 016.75 0h2.625a1.875 1.875 0 001.875-1.875V15z" />
@@ -27,31 +25,32 @@ export default function Navbar() {
             >
               NexusCommerce
             </span>
-          </button>
+          </Link>
 
           {/* Desktop Nav */}
           <nav className="hidden md:flex items-center gap-1">
             {[
-              { label: 'Home', page: 'home' as const },
-              { label: 'Products', page: 'products' as const },
-              { label: 'My Orders', page: 'my-orders' as const },
-              { label: 'Transactions', page: 'transactions' as const },
-            ].map(({ label, page }) => (
-              <button
-                key={page}
-                onClick={() => navigate(page)}
+              { label: 'Home', to: '/' as const },
+              { label: 'Products', to: '/products' as const },
+              { label: 'My Orders', to: '/orders' as const },
+              { label: 'Transactions', to: '/transactions' as const },
+            ].map(({ label, to }) => (
+              <Link
+                key={to}
+                to={to}
                 className="px-3 py-2 text-sm font-medium text-slate-600 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"
               >
                 {label}
-              </button>
+              </Link>
             ))}
           </nav>
 
           {/* Right actions */}
           <div className="flex items-center gap-2">
             {/* Cart */}
-            <button
-              onClick={() => navigate('cart')}
+            <Link
+              to={'/cart'}
+              aria-label={`Shopping cart, ${cartCount} items`}
               className="relative w-9 h-9 flex items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100 transition-colors"
             >
               <svg
@@ -72,7 +71,7 @@ export default function Navbar() {
                   {cartCount > 9 ? '9+' : cartCount}
                 </span>
               )}
-            </button>
+            </Link>
 
             {/* User menu */}
             <div className="relative">
@@ -109,9 +108,9 @@ export default function Navbar() {
                     <p className="text-xs text-slate-500">{currentUser?.email}</p>
                   </div>
                   {currentUser?.role === 'admin' && (
-                    <button
+                    <Link
+                      to={'/admin'}
                       onClick={() => {
-                        navigate('admin-dashboard');
                         setMenuOpen(false);
                       }}
                       className="w-full text-left px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 flex items-center gap-2"
@@ -130,7 +129,7 @@ export default function Navbar() {
                         />
                       </svg>
                       Admin Dashboard
-                    </button>
+                    </Link>
                   )}
                   <button
                     onClick={() => {
@@ -182,17 +181,22 @@ export default function Navbar() {
         {/* Mobile nav */}
         {mobileOpen && (
           <div className="md:hidden border-t border-slate-100 py-2">
-            {(['home', 'products', 'my-orders', 'transactions'] as const).map((page) => (
-              <button
-                key={page}
+            {[
+              { to: '/', label: 'Home' },
+              { to: '/products', label: 'Products' },
+              { to: '/orders', label: 'My Orders' },
+              { to: '/transactions', label: 'Transactions' },
+            ].map(({ to, label }) => (
+              <Link
+                key={to}
+                to={to}
                 onClick={() => {
-                  navigate(page);
                   setMobileOpen(false);
                 }}
                 className="block w-full text-left px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-50 capitalize"
               >
-                {page.replace('-', ' ')}
-              </button>
+                {label}
+              </Link>
             ))}
           </div>
         )}

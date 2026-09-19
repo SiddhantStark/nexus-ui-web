@@ -1,3 +1,4 @@
+import { Link } from 'react-router';
 import type { Product } from '../../types';
 import { useApp } from '../../context/AppContext';
 import Button from './Button';
@@ -7,7 +8,7 @@ interface ProductCardProps {
 }
 
 export default function ProductCard({ product }: ProductCardProps) {
-  const { navigate, addToCart } = useApp();
+  const { addToCart } = useApp();
   const outOfStock = !product.active || product.stock <= 0;
   const lowStock = product.stock > 0 && product.stock <= 5;
 
@@ -19,11 +20,10 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   return (
     <div className="relative bg-white border border-slate-100 rounded-xl overflow-hidden hover:shadow-md hover:border-slate-200 transition-all duration-200 cursor-pointer group">
-      <button
-        type="button"
+      <Link
         aria-label={`View ${product.name}`}
         className="absolute inset-0 z-10 rounded-xl focus-visible:outline-2 focus-visible:outline-indigo-600"
-        onClick={() => navigate('product-detail', { productId: product.id })}
+        to={`/products/${encodeURIComponent(product.id)}`}
       />
       <div className="relative overflow-hidden bg-slate-50">
         <img

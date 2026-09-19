@@ -1,10 +1,14 @@
+import { Link, useLocation, useNavigate } from 'react-router';
+import { loginDestination } from '../../app/authDestination';
 import { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Input } from '../../components/ui/Input';
 import Button from '../../components/ui/Button';
 
 export default function LoginPage() {
-  const { login, navigate } = useApp();
+  const navigate = useNavigate();
+  const { search } = useLocation();
+  const { login } = useApp();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -20,7 +24,9 @@ export default function LoginPage() {
     setLoading(true);
     const result = await login(email, password);
     setLoading(false);
-    if (!result.success) setError(result.error ?? 'Login failed');
+    if (result.success && result.user)
+      navigate(loginDestination(search, result.user), { replace: true });
+    else setError(result.error ?? 'Login failed');
   }
 
   function quickLogin(type: 'customer' | 'admin') {
@@ -146,12 +152,9 @@ export default function LoginPage() {
 
           <p className="text-sm text-center text-slate-500 mt-6">
             {"Don't have an account? "}
-            <button
-              onClick={() => navigate('register')}
-              className="text-indigo-600 font-medium hover:underline"
-            >
+            <Link to={'/register' + search} className="text-indigo-600 font-medium hover:underline">
               Create one
-            </button>
+            </Link>
           </p>
         </div>
       </div>

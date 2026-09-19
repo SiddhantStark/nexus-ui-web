@@ -1,10 +1,10 @@
+import { Link, useLocation } from 'react-router';
 import { useApp } from '../../context/AppContext';
-import type { PageName } from '../../types';
 
-const NAV_ITEMS: { label: string; page: PageName; icon: React.ReactNode }[] = [
+const NAV_ITEMS: { label: string; to: string; icon: React.ReactNode }[] = [
   {
     label: 'Dashboard',
-    page: 'admin-dashboard',
+    to: '/admin',
     icon: (
       <svg
         viewBox="0 0 24 24"
@@ -23,7 +23,7 @@ const NAV_ITEMS: { label: string; page: PageName; icon: React.ReactNode }[] = [
   },
   {
     label: 'Products',
-    page: 'admin-products',
+    to: '/admin/products',
     icon: (
       <svg
         viewBox="0 0 24 24"
@@ -42,7 +42,7 @@ const NAV_ITEMS: { label: string; page: PageName; icon: React.ReactNode }[] = [
   },
   {
     label: 'Inventory',
-    page: 'admin-inventory',
+    to: '/admin/inventory',
     icon: (
       <svg
         viewBox="0 0 24 24"
@@ -61,7 +61,7 @@ const NAV_ITEMS: { label: string; page: PageName; icon: React.ReactNode }[] = [
   },
   {
     label: 'Orders',
-    page: 'admin-orders',
+    to: '/admin/orders',
     icon: (
       <svg
         viewBox="0 0 24 24"
@@ -80,7 +80,7 @@ const NAV_ITEMS: { label: string; page: PageName; icon: React.ReactNode }[] = [
   },
   {
     label: 'Transactions',
-    page: 'admin-transactions',
+    to: '/admin/transactions',
     icon: (
       <svg
         viewBox="0 0 24 24"
@@ -99,7 +99,7 @@ const NAV_ITEMS: { label: string; page: PageName; icon: React.ReactNode }[] = [
   },
   {
     label: 'Refunds',
-    page: 'admin-refunds',
+    to: '/admin/refunds',
     icon: (
       <svg
         viewBox="0 0 24 24"
@@ -119,13 +119,14 @@ const NAV_ITEMS: { label: string; page: PageName; icon: React.ReactNode }[] = [
 ];
 
 export default function AdminSidebar() {
-  const { navigation, navigate, currentUser, logout } = useApp();
+  const { pathname } = useLocation();
+  const { currentUser, logout } = useApp();
 
   return (
     <aside className="w-60 shrink-0 bg-slate-900 flex flex-col min-h-screen">
       {/* Logo */}
       <div className="px-5 py-4 border-b border-slate-700/60">
-        <button onClick={() => navigate('admin-dashboard')} className="flex items-center gap-2">
+        <Link to={'/admin'} className="flex items-center gap-2">
           <div className="w-7 h-7 bg-indigo-500 rounded-lg flex items-center justify-center">
             <svg viewBox="0 0 24 24" fill="white" className="w-4 h-4">
               <path d="M3.375 4.5C2.339 4.5 1.5 5.34 1.5 6.375V13.5h12V6.375c0-1.036-.84-1.875-1.875-1.875h-8.25z" />
@@ -141,17 +142,18 @@ export default function AdminSidebar() {
             </p>
             <p className="text-[10px] text-slate-400 uppercase tracking-wider">Admin Portal</p>
           </div>
-        </button>
+        </Link>
       </div>
 
       {/* Nav */}
       <nav className="flex-1 px-3 py-4 flex flex-col gap-0.5">
-        {NAV_ITEMS.map(({ label, page, icon }) => {
-          const active = navigation.page === page;
+        {NAV_ITEMS.map(({ label, to, icon }) => {
+          const active = pathname === to || (to !== '/admin' && pathname.startsWith(to + '/'));
           return (
-            <button
-              key={page}
-              onClick={() => navigate(page)}
+            <Link
+              key={to}
+              aria-current={active ? 'page' : undefined}
+              to={to}
               className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left ${
                 active
                   ? 'bg-indigo-600 text-white'
@@ -160,7 +162,7 @@ export default function AdminSidebar() {
             >
               {icon}
               {label}
-            </button>
+            </Link>
           );
         })}
       </nav>
@@ -178,8 +180,8 @@ export default function AdminSidebar() {
             <p className="text-xs text-slate-400 truncate">{currentUser?.email}</p>
           </div>
         </div>
-        <button
-          onClick={() => navigate('home')}
+        <Link
+          to={'/'}
           className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-400 hover:text-white hover:bg-slate-800 rounded-lg transition-colors"
         >
           <svg
@@ -196,7 +198,7 @@ export default function AdminSidebar() {
             />
           </svg>
           Customer View
-        </button>
+        </Link>
         <button
           onClick={logout}
           className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"

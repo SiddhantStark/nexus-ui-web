@@ -1,14 +1,15 @@
+import LinkButton from '../../components/ui/LinkButton';
+import { Link } from 'react-router';
 import { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import StatusBadge from '../../components/ui/StatusBadge';
-import Button from '../../components/ui/Button';
 import Pagination from '../../components/ui/Pagination';
 import ConfirmDialog from '../../components/ui/ConfirmDialog';
 
 const PER_PAGE = 8;
 
 export default function AdminProductsPage() {
-  const { navigate, products, updateProduct, addToast } = useApp();
+  const { products, updateProduct, addToast } = useApp();
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [page, setPage] = useState(1);
@@ -46,7 +47,7 @@ export default function AdminProductsPage() {
           <h1 className="text-2xl font-bold text-slate-900">Products</h1>
           <p className="text-sm text-slate-500 mt-0.5">{products.length} products total</p>
         </div>
-        <Button onClick={() => navigate('admin-product-form')}>
+        <LinkButton to={'/admin/products/new'}>
           <svg
             viewBox="0 0 24 24"
             fill="none"
@@ -57,7 +58,7 @@ export default function AdminProductsPage() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
           </svg>
           Add Product
-        </Button>
+        </LinkButton>
       </div>
 
       {/* Filters */}
@@ -177,16 +178,12 @@ export default function AdminProductsPage() {
                 </td>
                 <td className="px-5 py-3.5">
                   <div className="flex items-center gap-2 justify-end">
-                    <button
-                      onClick={() =>
-                        navigate('admin-product-form', {
-                          productId: product.id,
-                        })
-                      }
+                    <Link
+                      to={`/admin/products/${encodeURIComponent(product.id)}/edit`}
                       className="text-xs text-indigo-600 hover:text-indigo-800 font-medium px-2 py-1 hover:bg-indigo-50 rounded-lg transition-colors"
                     >
                       Edit
-                    </button>
+                    </Link>
                     <button
                       onClick={() => setDeactivateTarget(product.id)}
                       className={`text-xs font-medium px-2 py-1 rounded-lg transition-colors ${

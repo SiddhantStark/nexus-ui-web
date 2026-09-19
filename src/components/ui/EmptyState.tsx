@@ -1,11 +1,12 @@
 import type { ReactNode } from 'react';
 import Button from './Button';
+import LinkButton from './LinkButton';
 
 interface EmptyStateProps {
   icon?: ReactNode;
   title: string;
   description?: string;
-  action?: { label: string; onClick: () => void };
+  action?: { label: string } & ({ to: string } | { onClick: () => void });
 }
 
 const DefaultIcon = () => (
@@ -34,9 +35,15 @@ export default function EmptyState({ icon, title, description, action }: EmptySt
       {description && <p className="text-sm text-slate-500 max-w-xs">{description}</p>}
       {action && (
         <div className="mt-5">
-          <Button size="sm" onClick={action.onClick}>
-            {action.label}
-          </Button>
+          {'to' in action ? (
+            <LinkButton size="sm" to={action.to}>
+              {action.label}
+            </LinkButton>
+          ) : (
+            <Button size="sm" onClick={action.onClick}>
+              {action.label}
+            </Button>
+          )}
         </div>
       )}
     </div>

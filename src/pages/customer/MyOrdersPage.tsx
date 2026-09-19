@@ -1,7 +1,8 @@
+import LinkButton from '../../components/ui/LinkButton';
+import { Link } from 'react-router';
 import { useState } from 'react';
-import { useApp, useMyOrders } from '../../context/AppContext';
+import { useMyOrders } from '../../context/AppContext';
 import StatusBadge from '../../components/ui/StatusBadge';
-import Button from '../../components/ui/Button';
 import EmptyState from '../../components/ui/EmptyState';
 import Breadcrumbs from '../../components/ui/Breadcrumbs';
 import Pagination from '../../components/ui/Pagination';
@@ -9,7 +10,6 @@ import Pagination from '../../components/ui/Pagination';
 const PER_PAGE = 5;
 
 export default function MyOrdersPage() {
-  const { navigate } = useApp();
   const orders = useMyOrders();
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState('all');
@@ -23,7 +23,7 @@ export default function MyOrdersPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-8 animate-fade-in">
-      <Breadcrumbs crumbs={[{ label: 'Home', page: 'home' }, { label: 'My Orders' }]} />
+      <Breadcrumbs crumbs={[{ label: 'Home', to: '/' }, { label: 'My Orders' }]} />
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">My Orders</h1>
@@ -31,9 +31,9 @@ export default function MyOrdersPage() {
             {orders.length} order{orders.length !== 1 ? 's' : ''} total
           </p>
         </div>
-        <Button variant="outline" size="sm" onClick={() => navigate('transactions')}>
+        <LinkButton variant="outline" size="sm" to={'/transactions'}>
           View Transactions
-        </Button>
+        </LinkButton>
       </div>
 
       {/* Status filter */}
@@ -68,7 +68,7 @@ export default function MyOrdersPage() {
           description="Place your first order to see it here."
           action={{
             label: 'Start Shopping',
-            onClick: () => navigate('products'),
+            to: '/products',
           }}
         />
       ) : (
@@ -78,11 +78,10 @@ export default function MyOrdersPage() {
               key={order.id}
               className="relative bg-white border border-slate-100 rounded-xl p-5 hover:shadow-sm hover:border-slate-200 transition-all cursor-pointer"
             >
-              <button
-                type="button"
+              <Link
                 aria-label={`View order ${order.id}`}
                 className="absolute inset-0 z-10 rounded-xl focus-visible:outline-2 focus-visible:outline-indigo-600"
-                onClick={() => navigate('order-detail', { orderId: order.id })}
+                to={`/orders/${encodeURIComponent(order.id)}`}
               />
               <div className="flex items-start justify-between gap-3 flex-wrap">
                 <div className="flex items-start gap-4">
@@ -130,17 +129,17 @@ export default function MyOrdersPage() {
                   </div>
                   <div className="text-right">
                     <p className="text-base font-bold text-slate-900">${order.total.toFixed(2)}</p>
-                    <Button
+                    <LinkButton
                       variant="outline"
                       size="sm"
+                      to={`/orders/${encodeURIComponent(order.id)}`}
                       onClick={(e) => {
                         e.stopPropagation();
-                        navigate('order-detail', { orderId: order.id });
                       }}
                       className="relative z-20 mt-1 text-xs"
                     >
                       View Details
-                    </Button>
+                    </LinkButton>
                   </div>
                 </div>
               </div>

@@ -1,3 +1,4 @@
+import { MemoryRouter } from 'react-router';
 import { StrictMode, type ReactElement, type ReactNode } from 'react';
 import { render, type RenderOptions } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -6,7 +7,9 @@ import { AppProvider } from '@/context/AppContext';
 function AppTestProviders({ children }: { children: ReactNode }) {
   return (
     <StrictMode>
-      <AppProvider>{children}</AppProvider>
+      <MemoryRouter>
+        <AppProvider>{children}</AppProvider>
+      </MemoryRouter>
     </StrictMode>
   );
 }

@@ -1,3 +1,4 @@
+import { MemoryRouter, useLocation, useNavigate } from 'react-router';
 import { useApp, AppProvider } from '../../context/AppContext';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -7,35 +8,39 @@ import { PRODUCTS, ADMIN_ORDERS } from '../../data/mockData';
 
 function CheckoutHarness() {
   const app = useApp();
+  const navigate = useNavigate();
+  const { pathname } = useLocation();
   return (
     <>
       <button
         onClick={async () => {
           await app.login('customer@nexuscommerce.com', 'password123');
           app.addToCart(app.products[0]);
-          app.navigate('checkout');
+          navigate('/checkout');
         }}
       >
         Begin checkout
       </button>
-      <button onClick={() => app.navigate('products')}>Leave checkout</button>
+      <button onClick={() => navigate('/products')}>Leave checkout</button>
       <button onClick={() => app.updateProduct({ ...app.products[0], stock: 0 })}>
         Sell remaining stock
       </button>
       <output aria-label="Orders">{app.orders.length}</output>
       <output aria-label="Cart quantity">{app.cartCount}</output>
       <output aria-label="Available stock">{app.products[0].stock}</output>
-      <output aria-label="Screen">{app.navigation.page}</output>
-      {app.navigation.page === 'checkout' && <CheckoutPage />}
+      <output aria-label="Screen">{pathname}</output>
+      {pathname === '/checkout' && <CheckoutPage />}
     </>
   );
 }
 async function ready() {
   const user = userEvent.setup();
   render(
-    <AppProvider>
-      <CheckoutHarness />
-    </AppProvider>,
+    <MemoryRouter>
+      <AppProvider>
+        <CheckoutHarness />
+      </AppProvider>
+    </MemoryRouter>,
   );
   await user.click(screen.getByRole('button', { name: 'Begin checkout' }));
   for (const [label, value] of Object.entries({
@@ -67,7 +72,7 @@ describe('checkout simulation', () => {
     expect(screen.getByLabelText('Available stock')).toHaveTextContent(
       String(PRODUCTS[0].stock - 1),
     );
-    expect(screen.getByLabelText('Screen')).toHaveTextContent('order-success');
+    expect(screen.getByLabelText('Screen')).toHaveTextContent(/\/orders\/.+\/success/);
   });
   it.each(['✗ Payment Failed', '⚠ Inventory Error'])(
     'preserves cart and orders after %s',
@@ -86,7 +91,7 @@ describe('checkout simulation', () => {
     await user.click(screen.getByRole('button', { name: /Place Demo Order/ }));
     await user.click(screen.getByRole('button', { name: 'Leave checkout' }));
     await finish();
-    expect(screen.getByLabelText('Screen')).toHaveTextContent('products');
+    expect(screen.getByLabelText('Screen')).toHaveTextContent('/products');
     expect(screen.getByLabelText('Orders')).toHaveTextContent(String(ADMIN_ORDERS.length));
     expect(screen.getByLabelText('Cart quantity')).toHaveTextContent('1');
   });

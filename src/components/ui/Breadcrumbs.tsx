@@ -1,10 +1,8 @@
-import { useApp } from '../../context/AppContext';
-import type { PageName, NavigationParams } from '../../types';
+import { Link } from 'react-router';
 
 interface Crumb {
   label: string;
-  page?: PageName;
-  params?: NavigationParams;
+  to?: string;
 }
 
 interface BreadcrumbsProps {
@@ -12,7 +10,6 @@ interface BreadcrumbsProps {
 }
 
 export default function Breadcrumbs({ crumbs }: BreadcrumbsProps) {
-  const { navigate } = useApp();
   return (
     <nav className="flex items-center gap-1.5 text-sm text-slate-500 mb-5">
       {crumbs.map((crumb, idx) => (
@@ -28,13 +25,10 @@ export default function Breadcrumbs({ crumbs }: BreadcrumbsProps) {
               <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
             </svg>
           )}
-          {crumb.page && idx < crumbs.length - 1 ? (
-            <button
-              onClick={() => navigate(crumb.page!, crumb.params)}
-              className="hover:text-indigo-600 transition-colors font-medium"
-            >
+          {crumb.to && idx < crumbs.length - 1 ? (
+            <Link to={crumb.to} className="hover:text-indigo-600 transition-colors font-medium">
               {crumb.label}
-            </button>
+            </Link>
           ) : (
             <span className={idx === crumbs.length - 1 ? 'text-slate-900 font-medium' : ''}>
               {crumb.label}

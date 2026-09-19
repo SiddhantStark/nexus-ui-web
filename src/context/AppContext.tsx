@@ -8,15 +8,7 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from 'react';
-import type {
-  Product,
-  User,
-  Toast,
-  PageName,
-  NavigationParams,
-  NavigationState,
-  DeliveryAddress,
-} from '../types';
+import type { Product, User, Toast, DeliveryAddress } from '../types';
 import {
   cartProblems,
   createCommerceStore,
@@ -49,7 +41,6 @@ function useAppState(initialState?: CommerceState) {
   const [store] = useState(() => createCommerceStore(initialState));
   const commerce = useSyncExternalStore(store.subscribe, store.getSnapshot);
   const accounts = useRef(structuredClone(DEMO_ACCOUNTS));
-  const [navigation, setNavigation] = useState<NavigationState>({ page: 'login' });
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [toasts, setToasts] = useState<Toast[]>([]);
   const timers = useRef(new Map<string, ReturnType<typeof setTimeout>>());
@@ -59,10 +50,6 @@ function useAppState(initialState?: CommerceState) {
       activeTimers.forEach(clearTimeout);
       activeTimers.clear();
     };
-  }, []);
-  const navigate = useCallback((page: PageName, params?: NavigationParams) => {
-    setNavigation({ page, params });
-    window.scrollTo({ top: 0 });
   }, []);
   const removeToast = useCallback((id: string) => {
     clearTimeout(timers.current.get(id));
@@ -89,8 +76,7 @@ function useAppState(initialState?: CommerceState) {
     if (!account || account.password !== password)
       return { success: false, error: 'Invalid email or password.' };
     setCurrentUser(account.user);
-    navigate(account.user.role === 'admin' ? 'admin-dashboard' : 'home');
-    return { success: true };
+    return { success: true, user: account.user };
   }
   async function register(name: string, email: string, password: string) {
     const normalized = email.trim().toLowerCase();
@@ -109,8 +95,6 @@ function useAppState(initialState?: CommerceState) {
   }
   return {
     ...commerce,
-    navigation,
-    navigate,
     currentUser,
     login,
     register,
@@ -120,7 +104,6 @@ function useAppState(initialState?: CommerceState) {
     logout() {
       setCurrentUser(null);
       store.clearCart();
-      navigate('login');
     },
     cartProblems: cartProblems(commerce),
     cartTotal:

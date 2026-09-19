@@ -91,35 +91,3 @@ export interface Toast {
   message: string;
   type: 'success' | 'error' | 'info' | 'warning';
 }
-
-export type PageName =
-  | 'login'
-  | 'register'
-  | 'home'
-  | 'products'
-  | 'product-detail'
-  | 'cart'
-  | 'checkout'
-  | 'order-success'
-  | 'my-orders'
-  | 'order-detail'
-  | 'transactions'
-  | 'admin-dashboard'
-  | 'admin-products'
-  | 'admin-product-form'
-  | 'admin-inventory'
-  | 'admin-orders'
-  | 'admin-transactions'
-  | 'admin-refunds';
-
-export interface NavigationParams {
-  productId?: string;
-  orderId?: string;
-  category?: string;
-  order?: Order;
-}
-
-export interface NavigationState {
-  page: PageName;
-  params?: NavigationParams;
-}

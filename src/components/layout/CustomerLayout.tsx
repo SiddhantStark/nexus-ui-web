@@ -1,11 +1,13 @@
-import type { ReactNode } from 'react';
+import { Link, Outlet } from 'react-router';
 import Navbar from './Navbar';
 
-export default function CustomerLayout({ children }: { children: ReactNode }) {
+export default function CustomerLayout() {
   return (
     <div className="min-h-screen bg-slate-50">
       <Navbar />
-      <main>{children}</main>
+      <main>
+        <Outlet />
+      </main>
       <footer className="bg-slate-900 text-slate-400 mt-16">
         <div className="max-w-7xl mx-auto px-6 py-12">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
@@ -31,15 +33,26 @@ export default function CustomerLayout({ children }: { children: ReactNode }) {
             {[
               {
                 title: 'Shop',
-                links: ['Electronics', 'Accessories', 'Footwear', 'Home & Kitchen'],
+                links: ['Electronics', 'Accessories', 'Footwear', 'Home & Kitchen'].map(
+                  (label) => ({
+                    label,
+                    to: `/products?${new URLSearchParams({ category: label })}`,
+                  }),
+                ),
               },
               {
                 title: 'Account',
-                links: ['My Orders', 'Transactions', 'Profile', 'Support'],
+                links: [
+                  { label: 'My Orders', to: '/orders' },
+                  { label: 'Transactions', to: '/transactions' },
+                ],
               },
               {
-                title: 'Company',
-                links: ['About Us', 'Careers', 'Privacy Policy', 'Terms of Service'],
+                title: 'Browse',
+                links: [
+                  { label: 'All Products', to: '/products' },
+                  { label: 'Shopping Cart', to: '/cart' },
+                ],
               },
             ].map(({ title, links }) => (
               <div key={title}>
@@ -47,9 +60,11 @@ export default function CustomerLayout({ children }: { children: ReactNode }) {
                   {title}
                 </h4>
                 <ul className="space-y-2">
-                  {links.map((link) => (
-                    <li key={link}>
-                      <span className="text-xs">{link}</span>
+                  {links.map(({ label, to }) => (
+                    <li key={to}>
+                      <Link to={to} className="text-xs hover:text-white hover:underline">
+                        {label}
+                      </Link>
                     </li>
                   ))}
                 </ul>

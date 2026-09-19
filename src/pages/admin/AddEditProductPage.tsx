@@ -1,3 +1,5 @@
+import LinkButton from '../../components/ui/LinkButton';
+import { Link, useParams, useNavigate } from 'react-router';
 import { useState } from 'react';
 import { useApp } from '../../context/AppContext';
 import { Input, Select, Textarea } from '../../components/ui/Input';
@@ -7,8 +9,9 @@ import Breadcrumbs from '../../components/ui/Breadcrumbs';
 const CATEGORIES = ['Electronics', 'Accessories', 'Footwear', 'Home & Kitchen', 'Sports', 'Books'];
 
 export default function AddEditProductPage() {
-  const { navigate, products, addProduct, updateProduct, navigation } = useApp();
-  const productId = navigation.params?.productId;
+  const navigate = useNavigate();
+  const { products, addProduct, updateProduct } = useApp();
+  const { productId } = useParams();
   const existing = products.find((p) => p.id === productId);
   const isEdit = !!existing;
 
@@ -61,7 +64,7 @@ export default function AddEditProductPage() {
       });
     }
     setSaving(false);
-    if (saved) navigate('admin-products');
+    if (saved) navigate('/admin/products');
   }
 
   const field = (key: keyof typeof form) => ({
@@ -71,11 +74,19 @@ export default function AddEditProductPage() {
     error: errors[key],
   });
 
+  if (productId && !existing)
+    return (
+      <main className="p-8">
+        <h1>Product not found.</h1>
+        <Link to="/admin/products">Back to products</Link>
+      </main>
+    );
+
   return (
     <div className="max-w-2xl animate-fade-in">
       <Breadcrumbs
         crumbs={[
-          { label: 'Products', page: 'admin-products' },
+          { label: 'Products', to: '/admin/products' },
           { label: isEdit ? 'Edit Product' : 'Add Product' },
         ]}
       />
@@ -153,9 +164,9 @@ export default function AddEditProductPage() {
           <Button loading={saving} onClick={handleSave}>
             {saving ? 'Saving…' : isEdit ? 'Save Changes' : 'Add Product'}
           </Button>
-          <Button variant="outline" onClick={() => navigate('admin-products')}>
+          <LinkButton variant="outline" to={'/admin/products'}>
             Cancel
-          </Button>
+          </LinkButton>
         </div>
       </div>
     </div>

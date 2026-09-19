@@ -1,17 +1,18 @@
+import LinkButton from '../../components/ui/LinkButton';
 import { useApp } from '../../context/AppContext';
-import Button from '../../components/ui/Button';
 import StatusBadge from '../../components/ui/StatusBadge';
-import type { Order } from '../../types';
+import { useParams } from 'react-router';
 
 export default function OrderSuccessPage() {
-  const { navigate, navigation } = useApp();
-  const order: Order | undefined = navigation.params?.order;
+  const { orderId } = useParams();
+  const { orders, currentUser } = useApp();
+  const order = orders.find((o) => o.id === orderId && o.customerId === currentUser?.id);
 
   if (!order) {
     return (
       <div className="max-w-7xl mx-auto px-6 py-20 text-center">
-        <p className="text-slate-500 mb-4">Order not found.</p>
-        <Button onClick={() => navigate('my-orders')}>View My Orders</Button>
+        <h1 className="text-slate-500 mb-4">Order not found.</h1>
+        <LinkButton to={'/orders'}>View My Orders</LinkButton>
       </div>
     );
   }
@@ -142,12 +143,12 @@ export default function OrderSuccessPage() {
 
       {/* Actions */}
       <div className="flex flex-col sm:flex-row gap-3">
-        <Button fullWidth onClick={() => navigate('order-detail', { orderId: order.id })}>
+        <LinkButton fullWidth to={`/orders/${encodeURIComponent(order.id)}`}>
           View Order Details
-        </Button>
-        <Button variant="outline" fullWidth onClick={() => navigate('products')}>
+        </LinkButton>
+        <LinkButton variant="outline" fullWidth to={'/products'}>
           Continue Shopping
-        </Button>
+        </LinkButton>
       </div>
 
       <p className="text-center text-xs text-slate-400 mt-5">

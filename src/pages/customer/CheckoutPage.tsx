@@ -1,3 +1,5 @@
+import LinkButton from '../../components/ui/LinkButton';
+import { useNavigate } from 'react-router';
 import { useState, useRef, useEffect } from 'react';
 import { useApp } from '../../context/AppContext';
 import Button from '../../components/ui/Button';
@@ -10,8 +12,8 @@ const SHOW_SCENARIOS = import.meta.env.DEV || import.meta.env.VITE_DEMO_MODE ===
 type CheckoutStep = 'form' | 'processing';
 
 export default function CheckoutPage() {
-  const { cart, cartTotal, cartVersion, cartProblems, currentUser, checkout, navigate, addToast } =
-    useApp();
+  const navigate = useNavigate();
+  const { cart, cartTotal, cartVersion, cartProblems, currentUser, checkout, addToast } = useApp();
   const [step, setStep] = useState<CheckoutStep>('form');
   const [testScenario, setTestScenario] = useState<Scenario>('success');
   const [checkoutError, setCheckoutError] = useState('');
@@ -66,7 +68,7 @@ export default function CheckoutPage() {
       pending.current = null;
       const result = checkout(form, version, attempt, SHOW_SCENARIOS ? testScenario : 'success');
       if (result.success) {
-        navigate('order-success', { order: result.value });
+        navigate(`/orders/${encodeURIComponent(result.value.id)}/success`, { replace: true });
       } else {
         setCheckoutError(result.error);
         setStep('form');
@@ -85,7 +87,7 @@ export default function CheckoutPage() {
     return (
       <div className="max-w-7xl mx-auto px-6 py-20 text-center">
         <p className="text-slate-500 mb-4">Your cart is empty.</p>
-        <Button onClick={() => navigate('products')}>Browse Products</Button>
+        <LinkButton to={'/products'}>Browse Products</LinkButton>
       </div>
     );
   }
@@ -121,11 +123,7 @@ export default function CheckoutPage() {
   return (
     <div className="max-w-7xl mx-auto px-6 py-8 animate-fade-in">
       <Breadcrumbs
-        crumbs={[
-          { label: 'Home', page: 'home' },
-          { label: 'Cart', page: 'cart' },
-          { label: 'Checkout' },
-        ]}
+        crumbs={[{ label: 'Home', to: '/' }, { label: 'Cart', to: '/cart' }, { label: 'Checkout' }]}
       />
       <h1 className="text-2xl font-bold text-slate-900 mb-6">Demo Checkout</h1>
       {checkoutError && (

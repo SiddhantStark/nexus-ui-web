@@ -1,5 +1,6 @@
+import { Link } from 'react-router';
 import { useState } from 'react';
-import { useApp, useMyTransactions } from '../../context/AppContext';
+import { useMyTransactions } from '../../context/AppContext';
 import StatusBadge from '../../components/ui/StatusBadge';
 import Breadcrumbs from '../../components/ui/Breadcrumbs';
 import EmptyState from '../../components/ui/EmptyState';
@@ -8,7 +9,6 @@ import Pagination from '../../components/ui/Pagination';
 const PER_PAGE = 8;
 
 export default function TransactionHistoryPage() {
-  const { navigate } = useApp();
   const transactions = useMyTransactions();
   const [typeFilter, setTypeFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -32,7 +32,7 @@ export default function TransactionHistoryPage() {
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-8 animate-fade-in">
-      <Breadcrumbs crumbs={[{ label: 'Home', page: 'home' }, { label: 'Transaction History' }]} />
+      <Breadcrumbs crumbs={[{ label: 'Home', to: '/' }, { label: 'Transaction History' }]} />
       <h1 className="text-2xl font-bold text-slate-900 mb-6">Transaction History</h1>
 
       {/* Summary */}
@@ -144,12 +144,12 @@ export default function TransactionHistoryPage() {
                       <span className="font-mono text-xs text-indigo-600 font-medium">{tx.id}</span>
                     </td>
                     <td className="px-5 py-4">
-                      <button
+                      <Link
                         className="font-mono text-xs text-slate-600 hover:text-indigo-600 transition-colors"
-                        onClick={() => navigate('order-detail', { orderId: tx.orderId })}
+                        to={`/orders/${encodeURIComponent(tx.orderId)}`}
                       >
                         {tx.orderId}
-                      </button>
+                      </Link>
                     </td>
                     <td className="px-5 py-4">
                       <StatusBadge status={tx.type} />
