@@ -1,0 +1,45 @@
+import type { Refund } from '@/features/refunds/types';
+
+export const SAMPLE_REFUNDS: Refund[] = [
+  {
+    id: 'REF-2024-0004',
+    orderId: 'ORD-2024-8820',
+    customerId: 'usr-001',
+    customerName: 'Alex Rivera',
+    amount: 899.0,
+    status: 'completed',
+    requestedAt: '2024-11-21T09:00:00Z',
+    reason: 'Item no longer needed',
+    transactionId: 'TXN-2024-0009',
+  },
+  {
+    id: 'REF-2024-0003',
+    orderId: 'ORD-2024-8755',
+    customerId: 'usr-001',
+    customerName: 'Alex Rivera',
+    amount: 249.0,
+    status: 'pending',
+    requestedAt: '2024-11-19T10:15:00Z',
+    reason: 'Defective product',
+  },
+  {
+    id: 'REF-2024-0002',
+    orderId: 'ORD-2024-8700',
+    customerId: 'usr-003',
+    customerName: 'Morgan Chen',
+    amount: 179.0,
+    status: 'processing',
+    requestedAt: '2024-11-15T14:20:00Z',
+    reason: 'Wrong size delivered',
+  },
+  {
+    id: 'REF-2024-0001',
+    orderId: 'ORD-2024-8680',
+    customerId: 'usr-002',
+    customerName: 'Jordan Lee',
+    amount: 68.0,
+    status: 'failed',
+    requestedAt: '2024-11-10T08:00:00Z',
+    reason: 'Changed mind',
+  },
+];

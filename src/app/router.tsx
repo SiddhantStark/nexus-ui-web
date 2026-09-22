@@ -1,34 +1,34 @@
+import { useSession } from '@/features/auth/SessionProvider';
 import { useEffect } from 'react';
 import { Routes, Route, Navigate, Outlet, Link, useLocation, useParams } from 'react-router';
-import { useApp } from '../context/AppContext';
-import CustomerLayout from '../components/layout/CustomerLayout';
-import AdminLayout from '../components/layout/AdminLayout';
+import CustomerLayout from '@/app/layouts/CustomerLayout';
+import AdminLayout from '@/app/layouts/AdminLayout';
 // Auth
-import LoginPage from '../pages/auth/LoginPage';
-import RegisterPage from '../pages/auth/RegisterPage';
+import LoginPage from '@/features/auth/pages/LoginPage';
+import RegisterPage from '@/features/auth/pages/RegisterPage';
 
 // Customer
-import HomePage from '../pages/customer/HomePage';
-import ProductListingPage from '../pages/customer/ProductListingPage';
-import ProductDetailsPage from '../pages/customer/ProductDetailsPage';
-import CartPage from '../pages/customer/CartPage';
-import CheckoutPage from '../pages/customer/CheckoutPage';
-import OrderSuccessPage from '../pages/customer/OrderSuccessPage';
-import MyOrdersPage from '../pages/customer/MyOrdersPage';
-import OrderDetailsPage from '../pages/customer/OrderDetailsPage';
-import TransactionHistoryPage from '../pages/customer/TransactionHistoryPage';
+import HomePage from '@/features/catalog/pages/HomePage';
+import ProductListingPage from '@/features/catalog/pages/ProductListingPage';
+import ProductDetailsPage from '@/features/catalog/pages/ProductDetailsPage';
+import CartPage from '@/features/cart/pages/CartPage';
+import CheckoutPage from '@/features/checkout/pages/CheckoutPage';
+import OrderSuccessPage from '@/features/orders/pages/OrderSuccessPage';
+import MyOrdersPage from '@/features/orders/pages/MyOrdersPage';
+import OrderDetailsPage from '@/features/orders/pages/OrderDetailsPage';
+import TransactionHistoryPage from '@/features/payments/pages/TransactionHistoryPage';
 
 // Admin
-import AdminDashboard from '../pages/admin/AdminDashboard';
-import AdminProductsPage from '../pages/admin/AdminProductsPage';
-import AddEditProductPage from '../pages/admin/AddEditProductPage';
-import InventoryPage from '../pages/admin/InventoryPage';
-import AdminOrdersPage from '../pages/admin/AdminOrdersPage';
-import AdminTransactionsPage from '../pages/admin/AdminTransactionsPage';
-import AdminRefundsPage from '../pages/admin/AdminRefundsPage';
+import AdminDashboard from '@/features/dashboard/pages/AdminDashboard';
+import AdminProductsPage from '@/features/catalog/pages/admin/AdminProductsPage';
+import AddEditProductPage from '@/features/catalog/pages/admin/AddEditProductPage';
+import InventoryPage from '@/features/inventory/pages/InventoryPage';
+import AdminOrdersPage from '@/features/orders/pages/admin/AdminOrdersPage';
+import AdminTransactionsPage from '@/features/payments/pages/admin/AdminTransactionsPage';
+import AdminRefundsPage from '@/features/refunds/pages/AdminRefundsPage';
 
 function RequireSession() {
-  const { currentUser } = useApp();
+  const { currentUser } = useSession();
   const location = useLocation();
   return currentUser ? (
     <Outlet />
@@ -40,7 +40,7 @@ function RequireSession() {
   );
 }
 function RequireAdmin() {
-  const { currentUser } = useApp();
+  const { currentUser } = useSession();
   return currentUser?.role === 'admin' ? <Outlet /> : <Navigate replace to="/forbidden" />;
 }
 function RouteMessage({ forbidden = false }: { forbidden?: boolean }) {

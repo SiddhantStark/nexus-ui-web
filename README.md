@@ -42,13 +42,13 @@ ESLint 9 is temporarily retained because eslint-plugin-jsx-a11y 6.10.2 declares 
 
 - `pnpm test`: run all component/unit tests once; failures return a nonzero exit code.
 - `pnpm test:watch`: rerun affected tests while developing; press `q` to quit.
-- `pnpm test src/components/ui/ProductCard.test.tsx`: run one test file.
+- `pnpm test src/features/catalog/components/ProductCard.test.tsx`: run one test file.
 
 Vitest uses its own `vitest.config.ts`, React transforms, the `@` alias, and jsdom. It does not load the Figma preview plugins. jsdom 26 retains compatibility with the documented Node range; newer jsdom releases require higher Node patch versions.
 
 Place `*.test.ts` or `*.test.tsx` beside the component/feature being tested. Import `describe`, `it`, `expect`, and `vi` explicitly from Vitest. `src/test/setup.ts` installs jest-dom assertions, cleans up mounted components after each test, restores real timers, and stubs the scrolling API missing from jsdom. Vitest clears/restores mocks between tests.
 
-Use `renderWithApp` from `src/test/renderWithApp.tsx` for components requiring the existing AppProvider. It creates a fresh provider inside MemoryRouter under StrictMode and returns a user-event session alongside Testing Library's render result. Use plain Testing Library `render` for provider-independent controls. Avoid shared mutable fixtures, snapshots of whole pages, and assertions on CSS classes/internal state. Await user interactions and assert visible outcomes.
+Use `renderWithApp` from `src/test/renderWithApp.tsx` for components requiring the application providers. It creates fresh session, notification, and commerce providers inside MemoryRouter under StrictMode and returns a user-event session alongside Testing Library's render result. Use plain Testing Library `render` for provider-independent controls. Avoid shared mutable fixtures, snapshots of whole pages, and assertions on CSS classes/internal state. Await user interactions and assert visible outcomes.
 
 Initial coverage checks product-card/cart integration, out-of-stock behavior, and confirmation/cancellation actions. Regression tests cover registration, checkout failures/unmounts, stock limits, cancellation, refund rejection/completion, and repeated actions. These DOM tests do not verify real-browser layout, keyboard focus trapping, or complete commerce workflows; browser coverage remains later work. Testing setup follows [Vitest configuration](https://vitest.dev/guide/index.html) and [Testing Library setup](https://testing-library.com/docs/react-testing-library/setup/).
 
@@ -81,17 +81,23 @@ A refresh or new tab resets the in-memory demo session/data and prompts for sign
 
 Routing regression tests cover direct links, registration redirects, ownership, role guards, sign-out, browser history, missing records, query normalization, and safe post-login destinations. Layout and full browser workflow coverage remain separate from DOM tests.
 
-## Structure and baseline
+## Structure and state ownership
 
-- `src/App.tsx`: BrowserRouter, demo provider, and toast composition.
-- `src/app/router.tsx`: nested route tree, sign-in/admin guards, and route error screens.
-- `src/pages/{auth,customer,admin}`: application screens.
-- `src/components/{layout,ui}`: layouts and shared controls.
-- `src/context/AppContext.tsx`: current shared demo state.
-- `src/data/mockData.ts` and `src/types/index.ts`: fixtures and frontend types.
-- `src/index.css`: global styles and Tailwind entrypoint.
+- `src/app/`: application composition, provider wiring, routing, and layouts.
+- `src/features/`: auth, catalog, cart, checkout, orders, payments, refunds, inventory, dashboard, and the commerce store contract. Pages, components, hooks, types, and tests live with their feature.
+- `src/shared/ui/`: domain-independent controls; domain status labels and product cards live in their features.
+- `src/shared/notifications/`: notification state, timers, and stable notification commands.
+- `src/shared/lib/`: small domain-independent helpers/types.
+- `src/mocks/demo-store.ts`: coordinated in-memory commerce operations; `src/mocks/fixtures/` holds seed data.
+- `src/styles/index.css`: global styles and Tailwind entrypoint.
+- `src/test/`: shared testing utilities and dependency-boundary checks.
+- `docs/design/`: the original Figma design brief.
 
-See [screen baseline](../docs/frontend-screen-baseline.md) and the [step-by-step improvement plan](../docs/frontend-improvement-plan.md). Feature folder reorganization is Phase 5; APIs and DTOs remain deferred.
+`app/providers.tsx` creates the demo store once and injects it through the typed `CommerceStore` contract. Session state lives in auth; notifications have their own provider. Cart state stays in the coordinated commerce store to preserve atomic checkout, but consumers use a focused `useCart` hook. Stored cart entries contain only product IDs and quantities. Display details and totals use the current catalog; historical order lines retain their purchase-time values. Local forms and dialogs remain local, and shareable catalog filters remain in the URL.
+
+Features do not import app composition or concrete mock implementations. Shared code does not import features or business state. The architecture tests check these boundaries and circular runtime imports. Cross-feature operations remain behind the commerce contract; no API or DTO layers have been scaffolded. See [frontend architecture](docs/frontend-architecture.md) for ownership and extension guidance.
+
+See [screen baseline](../docs/frontend-screen-baseline.md) and the [step-by-step improvement plan](../docs/frontend-improvement-plan.md). Phases 1–5 are implemented; accessibility, resilience, end-to-end testing/CI, and backend integration remain later work.
 
 ## Repository boundary
 

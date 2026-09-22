@@ -1,6 +1,6 @@
 # Frontend routing
 
-Phase 4 introduces React Router 7 declarative routing. `App.tsx` composes BrowserRouter and the demo provider; `src/app/router.tsx` owns routes and nested layout guards. Navigation uses links; mutations use buttons and redirect only after success. Navigation state no longer lives in AppContext.
+Phase 4 introduces React Router 7 declarative routing. `src/app/App.tsx` composes BrowserRouter and the demo provider; `src/app/router.tsx` owns routes and nested layout guards. Navigation uses links; mutations use buttons and redirect only after success. Navigation state is owned by the router; the old AppContext was removed in Phase 5.
 
 | Routes | Access / behavior |
 | --- | --- |
@@ -28,7 +28,7 @@ No session or commerce data is persisted. Reloading or opening a link in another
 
 ## Verification
 
-Automated route tests live in `src/app/router.test.tsx` and `authDestination.test.ts`. Existing registration and checkout tests also exercise the updated navigation.
+Automated route tests live in `src/app/router.test.tsx` and `src/features/auth/authDestination.test.ts`. Existing registration and checkout tests also exercise the updated navigation.
 
 Manual browser smoke checks:
 

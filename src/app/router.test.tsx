@@ -1,14 +1,15 @@
+import { useSession } from '@/features/auth/SessionProvider';
+import AppProviders from '@/app/providers';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter, useLocation, useNavigate, Link } from 'react-router';
 import { describe, expect, it } from 'vitest';
-import { AppProvider, useApp } from '../context/AppContext';
-import AppRoutes from './router';
+import AppRoutes from '@/app/router';
 
 function HistoryControls() {
   const location = useLocation();
   const navigate = useNavigate();
-  const { logout } = useApp();
+  const { logout } = useSession();
   return (
     <aside aria-label="Test navigation">
       <output data-testid="location">{location.pathname + location.search}</output>
@@ -23,10 +24,10 @@ function setup(path: string) {
   const user = userEvent.setup();
   const view = render(
     <MemoryRouter initialEntries={[path]}>
-      <AppProvider>
+      <AppProviders>
         <HistoryControls />
         <AppRoutes />
-      </AppProvider>
+      </AppProviders>
     </MemoryRouter>,
   );
   return { user, ...view };

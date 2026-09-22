@@ -1,0 +1,207 @@
+import type { Order } from '@/features/orders/types';
+
+export const SAMPLE_ORDERS: Order[] = [
+  {
+    id: 'ORD-2024-8841',
+    customerId: 'usr-001',
+    customerName: 'Alex Rivera',
+    customerEmail: 'alex@example.com',
+    items: [
+      {
+        productId: 'prod-001',
+        productName: 'ProBook Air 15',
+        imageUrl:
+          'https://images.unsplash.com/photo-1496181133206-80ce9b88a853?w=100&h=100&fit=crop',
+        quantity: 1,
+        price: 1299.0,
+      },
+      {
+        productId: 'prod-003',
+        productName: 'SoundWave Pro',
+        imageUrl:
+          'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=100&h=100&fit=crop',
+        quantity: 1,
+        price: 249.0,
+      },
+    ],
+    total: 1548.0,
+    orderStatus: 'confirmed',
+    paymentStatus: 'paid',
+    createdAt: '2024-11-28T14:22:00Z',
+    deliveryAddress: {
+      name: 'Alex Rivera',
+      email: 'alex@example.com',
+      phone: '+1 (555) 234-5678',
+      address: '742 Evergreen Terrace',
+      city: 'Springfield',
+      state: 'IL',
+      postalCode: '62701',
+    },
+    transactionId: 'TXN-2024-0012',
+    paymentMethod: 'Credit Card',
+  },
+  {
+    id: 'ORD-2024-8820',
+    customerId: 'usr-001',
+    customerName: 'Alex Rivera',
+    customerEmail: 'alex@example.com',
+    items: [
+      {
+        productId: 'prod-002',
+        productName: 'NexPhone X12',
+        imageUrl:
+          'https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?w=100&h=100&fit=crop',
+        quantity: 1,
+        price: 899.0,
+      },
+    ],
+    total: 899.0,
+    orderStatus: 'cancelled',
+    paymentStatus: 'refunded',
+    createdAt: '2024-11-20T09:15:00Z',
+    deliveryAddress: {
+      name: 'Alex Rivera',
+      email: 'alex@example.com',
+      phone: '+1 (555) 234-5678',
+      address: '742 Evergreen Terrace',
+      city: 'Springfield',
+      state: 'IL',
+      postalCode: '62701',
+    },
+    transactionId: 'TXN-2024-0008',
+    paymentMethod: 'Credit Card',
+  },
+  {
+    id: 'ORD-2024-8790',
+    customerId: 'usr-001',
+    customerName: 'Alex Rivera',
+    customerEmail: 'alex@example.com',
+    items: [
+      {
+        productId: 'prod-005',
+        productName: 'ChronoElite Watch',
+        imageUrl:
+          'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=100&h=100&fit=crop',
+        quantity: 1,
+        price: 349.0,
+      },
+      {
+        productId: 'prod-006',
+        productName: 'AeroRunner Pro',
+        imageUrl: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=100&h=100&fit=crop',
+        quantity: 2,
+        price: 179.0,
+      },
+    ],
+    total: 707.0,
+    orderStatus: 'pending',
+    paymentStatus: 'pending',
+    createdAt: '2024-11-30T16:45:00Z',
+    deliveryAddress: {
+      name: 'Alex Rivera',
+      email: 'alex@example.com',
+      phone: '+1 (555) 234-5678',
+      address: '742 Evergreen Terrace',
+      city: 'Springfield',
+      state: 'IL',
+      postalCode: '62701',
+    },
+    paymentMethod: 'Simulated Payment',
+  },
+  {
+    id: 'ORD-2024-8755',
+    customerId: 'usr-001',
+    customerName: 'Alex Rivera',
+    customerEmail: 'alex@example.com',
+    items: [
+      {
+        productId: 'prod-009',
+        productName: 'BrewMaster Pro',
+        imageUrl:
+          'https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=100&h=100&fit=crop',
+        quantity: 1,
+        price: 249.0,
+      },
+    ],
+    total: 249.0,
+    orderStatus: 'cancelled',
+    paymentStatus: 'refund_pending',
+    createdAt: '2024-11-18T11:30:00Z',
+    deliveryAddress: {
+      name: 'Alex Rivera',
+      email: 'alex@example.com',
+      phone: '+1 (555) 234-5678',
+      address: '742 Evergreen Terrace',
+      city: 'Springfield',
+      state: 'IL',
+      postalCode: '62701',
+    },
+    transactionId: 'TXN-2024-0005',
+    paymentMethod: 'Credit Card',
+  },
+];
+
+export const ADMIN_ORDERS: Order[] = [
+  ...SAMPLE_ORDERS,
+  {
+    id: 'ORD-2024-8835',
+    customerId: 'usr-002',
+    customerName: 'Jordan Lee',
+    customerEmail: 'jordan@example.com',
+    items: [
+      {
+        productId: 'prod-005',
+        productName: 'ChronoElite Watch',
+        imageUrl:
+          'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=100&h=100&fit=crop',
+        quantity: 1,
+        price: 349.0,
+      },
+    ],
+    total: 349.0,
+    orderStatus: 'pending',
+    paymentStatus: 'failed',
+    createdAt: '2024-11-27T10:00:00Z',
+    deliveryAddress: {
+      name: 'Jordan Lee',
+      email: 'jordan@example.com',
+      phone: '+1 (555) 345-6789',
+      address: '123 Oak Street',
+      city: 'Austin',
+      state: 'TX',
+      postalCode: '78701',
+    },
+    paymentMethod: 'Credit Card',
+  },
+  {
+    id: 'ORD-2024-8830',
+    customerId: 'usr-003',
+    customerName: 'Morgan Chen',
+    customerEmail: 'morgan@example.com',
+    items: [
+      {
+        productId: 'prod-004',
+        productName: 'SnapMaster 4K',
+        imageUrl:
+          'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=100&h=100&fit=crop',
+        quantity: 1,
+        price: 2199.0,
+      },
+    ],
+    total: 2199.0,
+    orderStatus: 'confirmed',
+    paymentStatus: 'paid',
+    createdAt: '2024-11-26T08:30:00Z',
+    deliveryAddress: {
+      name: 'Morgan Chen',
+      email: 'morgan@example.com',
+      phone: '+1 (555) 456-7890',
+      address: '456 Pine Ave',
+      city: 'Seattle',
+      state: 'WA',
+      postalCode: '98101',
+    },
+    transactionId: 'TXN-2024-0010',
+    paymentMethod: 'Simulated Payment',
+  },
+];
