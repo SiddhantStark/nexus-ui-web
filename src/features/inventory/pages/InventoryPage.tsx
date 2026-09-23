@@ -1,13 +1,13 @@
+import ScrollRegion from '@/shared/ui/ScrollRegion';
+import { useErrorFocus } from '@/shared/hooks/useErrorFocus';
 import StockStatusBadge from '@/features/inventory/components/StockStatusBadge';
 import { useInventory } from '@/features/inventory/useInventory';
-import { useNotificationActions } from '@/shared/notifications/NotificationProvider';
 import { useState } from 'react';
 import Button from '@/shared/ui/Button';
 import Modal from '@/shared/ui/Modal';
 import { Input } from '@/shared/ui/Input';
 
 export default function InventoryPage() {
-  const { addToast } = useNotificationActions();
   const { products, adjustStock } = useInventory();
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
@@ -16,6 +16,8 @@ export default function InventoryPage() {
     name: string;
     stock: number;
   } | null>(null);
+  const [quantityError, setQuantityError] = useState('');
+  const formRef = useErrorFocus(quantityError);
   const [delta, setDelta] = useState('');
   const [mode, setMode] = useState<'add' | 'subtract'>('add');
   const [saving, setSaving] = useState(false);
@@ -33,18 +35,23 @@ export default function InventoryPage() {
   });
 
   async function handleUpdateStock() {
-    if (!editTarget) return;
+    if (!editTarget || saving) return;
     if (!Number.isInteger(Number(delta)) || Number(delta) <= 0) {
-      addToast('Enter a positive whole number.', 'error');
+      setQuantityError('Enter a positive whole number.');
       return;
     }
+    setQuantityError('');
     setSaving(true);
     await new Promise((r) => setTimeout(r, 500));
     const saved = adjustStock(editTarget.id, Number(delta), mode);
     setSaving(false);
-    if (!saved) return;
+    if (!saved) {
+      setQuantityError('Stock could not be updated. Review the quantity and try again.');
+      return;
+    }
     setEditTarget(null);
     setDelta('');
+    setQuantityError('');
   }
 
   return (
@@ -93,7 +100,7 @@ export default function InventoryPage() {
             fill="none"
             stroke="currentColor"
             strokeWidth="2"
-            className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"
+            className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2"
           >
             <path
               strokeLinecap="round"
@@ -102,6 +109,8 @@ export default function InventoryPage() {
             />
           </svg>
           <input
+            aria-label="Search inventory"
+            id="InventoryPage-search-inventory"
             placeholder="Search products…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -130,29 +139,50 @@ export default function InventoryPage() {
         </div>
       </div>
 
-      <div className="bg-white border border-slate-100 rounded-xl overflow-hidden">
-        <table className="w-full text-sm">
+      <ScrollRegion label="Inventory table" className="bg-white border border-slate-100 rounded-xl">
+        <table className="w-full min-w-[680px] text-sm">
           <thead>
             <tr className="bg-slate-50 border-b border-slate-100">
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+              <th
+                scope="col"
+                className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide"
+              >
                 Product
               </th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+              <th
+                scope="col"
+                className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide"
+              >
                 SKU
               </th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+              <th
+                scope="col"
+                className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide"
+              >
                 Current Stock
               </th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+              <th
+                scope="col"
+                className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide"
+              >
                 Reserved
               </th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+              <th
+                scope="col"
+                className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide"
+              >
                 Available
               </th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+              <th
+                scope="col"
+                className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide"
+              >
                 Status
               </th>
-              <th className="text-right px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+              <th
+                scope="col"
+                className="text-right px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide"
+              >
                 Action
               </th>
             </tr>
@@ -199,6 +229,7 @@ export default function InventoryPage() {
                           stock: product.stock,
                         });
                         setDelta('');
+                        setQuantityError('');
                         setMode('add');
                       }}
                     >
@@ -210,7 +241,7 @@ export default function InventoryPage() {
             })}
           </tbody>
         </table>
-      </div>
+      </ScrollRegion>
 
       <Modal
         open={!!editTarget}
@@ -219,7 +250,15 @@ export default function InventoryPage() {
         size="sm"
       >
         {editTarget && (
-          <div className="flex flex-col gap-4">
+          <form
+            ref={formRef}
+            noValidate
+            onSubmit={(event) => {
+              event.preventDefault();
+              void handleUpdateStock();
+            }}
+            className="flex flex-col gap-4"
+          >
             <div className="bg-slate-50 rounded-lg p-3">
               <p className="text-sm font-semibold text-slate-900">{editTarget.name}</p>
               <p className="text-xs text-slate-500 mt-0.5">
@@ -230,11 +269,13 @@ export default function InventoryPage() {
               {(['add', 'subtract'] as const).map((m) => (
                 <button
                   key={m}
+                  type="button"
+                  aria-pressed={mode === m}
                   onClick={() => setMode(m)}
                   className={`flex-1 py-2 text-sm rounded-lg border font-medium transition-colors ${
                     mode === m
                       ? m === 'add'
-                        ? 'bg-emerald-600 text-white border-emerald-600'
+                        ? 'bg-emerald-700 text-white border-emerald-700'
                         : 'bg-red-600 text-white border-red-600'
                       : 'bg-white text-slate-600 border-slate-200 hover:border-slate-300'
                   }`}
@@ -245,6 +286,8 @@ export default function InventoryPage() {
             </div>
             <Input
               label="Quantity"
+              required
+              error={quantityError}
               type="number"
               min="1"
               value={delta}
@@ -262,14 +305,14 @@ export default function InventoryPage() {
               </p>
             )}
             <div className="flex gap-3">
-              <Button fullWidth loading={saving} onClick={handleUpdateStock}>
+              <Button type="submit" fullWidth loading={saving}>
                 Update
               </Button>
               <Button variant="outline" fullWidth onClick={() => setEditTarget(null)}>
                 Cancel
               </Button>
             </div>
-          </div>
+          </form>
         )}
       </Modal>
     </div>

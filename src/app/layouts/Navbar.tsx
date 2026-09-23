@@ -1,7 +1,7 @@
 import { useSession } from '@/features/auth/SessionProvider';
 import { useCart } from '@/features/cart/useCart';
 import { Link } from 'react-router';
-import { useState } from 'react';
+import { useState, useRef, useEffect, useId } from 'react';
 
 export default function Navbar() {
   const { currentUser, logout } = useSession();
@@ -9,12 +9,41 @@ export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  const account = useRef<HTMLDivElement>(null);
+  const accountButton = useRef<HTMLButtonElement>(null);
+  const mobileButton = useRef<HTMLButtonElement>(null);
+  const accountId = useId();
+  const mobileId = useId();
+  useEffect(() => {
+    if (!menuOpen) return;
+    function dismiss(event: PointerEvent) {
+      if (event.target instanceof Node && !account.current?.contains(event.target))
+        setMenuOpen(false);
+    }
+    document.addEventListener('pointerdown', dismiss);
+    return () => document.removeEventListener('pointerdown', dismiss);
+  }, [menuOpen]);
   return (
-    <header className="sticky top-0 z-40 bg-white border-b border-slate-100 shadow-sm">
+    // Escape bubbles from the disclosure controls; the header is not itself interactive.
+    // eslint-disable-next-line jsx-a11y/no-static-element-interactions
+    <header
+      onKeyDown={(event) => {
+        if (event.key === 'Escape') {
+          if (menuOpen) {
+            setMenuOpen(false);
+            accountButton.current?.focus();
+          } else if (mobileOpen) {
+            setMobileOpen(false);
+            mobileButton.current?.focus();
+          }
+        }
+      }}
+      className="sticky top-0 z-40 bg-white border-b border-slate-100 shadow-sm"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link to={'/'} className="flex items-center gap-2 focus:outline-none">
+          <Link to={'/'} className="flex items-center gap-2 min-w-0">
             <div className="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center">
               <svg viewBox="0 0 24 24" fill="white" className="w-5 h-5">
                 <path d="M3.375 4.5C2.339 4.5 1.5 5.34 1.5 6.375V13.5h12V6.375c0-1.036-.84-1.875-1.875-1.875h-8.25zM13.5 15h-12v2.625c0 1.035.84 1.875 1.875 1.875H5.25a3.375 3.375 0 016.75 0h2.625a1.875 1.875 0 001.875-1.875V15z" />
@@ -22,7 +51,7 @@ export default function Navbar() {
               </svg>
             </div>
             <span
-              className="text-lg font-bold text-slate-900"
+              className="text-sm sm:text-lg font-bold text-slate-900"
               style={{ fontFamily: "'Outfit', sans-serif" }}
             >
               NexusCommerce
@@ -30,7 +59,7 @@ export default function Navbar() {
           </Link>
 
           {/* Desktop Nav */}
-          <nav className="hidden md:flex items-center gap-1">
+          <nav aria-label="Store navigation" className="hidden lg:flex items-center gap-1">
             {[
               { label: 'Home', to: '/' as const },
               { label: 'Products', to: '/products' as const },
@@ -76,10 +105,20 @@ export default function Navbar() {
             </Link>
 
             {/* User menu */}
-            <div className="relative">
+            <div
+              ref={account}
+              onBlur={(event) => {
+                if (!event.currentTarget.contains(event.relatedTarget)) setMenuOpen(false);
+              }}
+              className="relative"
+            >
               <button
+                ref={accountButton}
+                aria-label="Account navigation"
+                aria-expanded={menuOpen}
+                aria-controls={accountId}
                 onClick={() => setMenuOpen(!menuOpen)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-lg hover:bg-slate-100 transition-colors"
+                className="flex items-center gap-1 px-1 sm:px-3 py-1.5 rounded-lg hover:bg-slate-100 transition-colors"
               >
                 <div className="w-7 h-7 bg-indigo-100 rounded-full flex items-center justify-center">
                   <span className="text-xs font-semibold text-indigo-700">
@@ -104,7 +143,10 @@ export default function Navbar() {
                 </svg>
               </button>
               {menuOpen && (
-                <div className="absolute right-0 mt-1 w-52 bg-white border border-slate-200 rounded-xl shadow-lg py-1 z-50">
+                <div
+                  id={accountId}
+                  className="absolute right-0 mt-1 w-52 bg-white border border-slate-200 rounded-xl shadow-lg py-1 z-50"
+                >
                   <div className="px-4 py-2.5 border-b border-slate-100">
                     <p className="text-sm font-semibold text-slate-900">{currentUser?.name}</p>
                     <p className="text-xs text-slate-500">{currentUser?.email}</p>
@@ -161,8 +203,12 @@ export default function Navbar() {
 
             {/* Mobile menu */}
             <button
+              ref={mobileButton}
+              aria-label="Store navigation"
+              aria-expanded={mobileOpen}
+              aria-controls={mobileId}
               onClick={() => setMobileOpen(!mobileOpen)}
-              className="md:hidden w-9 h-9 flex items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100"
+              className="lg:hidden w-9 h-9 flex items-center justify-center rounded-lg text-slate-600 hover:bg-slate-100"
             >
               <svg
                 viewBox="0 0 24 24"
@@ -182,7 +228,11 @@ export default function Navbar() {
         </div>
         {/* Mobile nav */}
         {mobileOpen && (
-          <div className="md:hidden border-t border-slate-100 py-2">
+          <nav
+            id={mobileId}
+            aria-label="Mobile store navigation"
+            className="lg:hidden border-t border-slate-100 py-2"
+          >
             {[
               { to: '/', label: 'Home' },
               { to: '/products', label: 'Products' },
@@ -200,17 +250,9 @@ export default function Navbar() {
                 {label}
               </Link>
             ))}
-          </div>
+          </nav>
         )}
       </div>
-      {menuOpen && (
-        <button
-          type="button"
-          aria-label="Close account menu"
-          className="fixed inset-0 z-40"
-          onClick={() => setMenuOpen(false)}
-        />
-      )}
     </header>
   );
 }

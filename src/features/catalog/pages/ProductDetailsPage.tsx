@@ -73,7 +73,7 @@ export default function ProductDetailsPage() {
 
         {/* Info */}
         <div className="flex flex-col">
-          <p className="text-xs text-slate-400 font-mono mb-2">SKU: {product.sku}</p>
+          <p className="text-xs text-slate-500 font-mono mb-2">SKU: {product.sku}</p>
           <h1 className="text-3xl font-bold text-slate-900 mb-2">{product.name}</h1>
           <div className="flex items-center gap-2 mb-4">
             <div className="flex text-amber-400">
@@ -96,12 +96,12 @@ export default function ProductDetailsPage() {
                 Out of stock — join waitlist
               </span>
             ) : lowStock ? (
-              <span className="flex items-center gap-1.5 text-sm text-amber-600 font-medium">
+              <span className="flex items-center gap-1.5 text-sm text-amber-700 font-medium">
                 <span className="w-2 h-2 bg-amber-400 rounded-full" />
                 Only {product.stock} left in stock
               </span>
             ) : (
-              <span className="flex items-center gap-1.5 text-sm text-emerald-600 font-medium">
+              <span className="flex items-center gap-1.5 text-sm text-emerald-700 font-medium">
                 <span className="w-2 h-2 bg-emerald-400 rounded-full" />
                 In stock ({product.stock} available)
               </span>
@@ -114,6 +114,7 @@ export default function ProductDetailsPage() {
               <span className="text-sm font-medium text-slate-700">Quantity</span>
               <div className="flex items-center gap-0 border border-slate-300 rounded-lg overflow-hidden">
                 <button
+                  aria-label="Decrease quantity"
                   onClick={() => setQty((q) => Math.max(1, q - 1))}
                   className="w-9 h-9 flex items-center justify-center text-slate-600 hover:bg-slate-100 transition-colors font-bold"
                 >
@@ -121,6 +122,7 @@ export default function ProductDetailsPage() {
                 </button>
                 <span className="w-12 text-center text-sm font-semibold text-slate-900">{qty}</span>
                 <button
+                  aria-label="Increase quantity"
                   onClick={() => setQty((q) => Math.min(product.stock, q + 1))}
                   className="w-9 h-9 flex items-center justify-center text-slate-600 hover:bg-slate-100 transition-colors font-bold"
                 >
@@ -176,7 +178,7 @@ export default function ProductDetailsPage() {
                   i % 2 === 0 ? 'bg-white' : 'bg-slate-50'
                 }`}
               >
-                <span className="font-medium text-slate-700 w-40 shrink-0">{key}</span>
+                <span className="font-medium text-slate-700 w-28 sm:w-40 shrink-0">{key}</span>
                 <span className="text-slate-600">{val}</span>
               </div>
             ))}
@@ -188,7 +190,7 @@ export default function ProductDetailsPage() {
       {related.length > 0 && (
         <div className="mb-12">
           <h2 className="text-xl font-bold text-slate-900 mb-5">Related Products</h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {related.map((p) => (
               <ProductCard key={p.id} product={p} />
             ))}

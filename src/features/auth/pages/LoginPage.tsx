@@ -1,3 +1,4 @@
+import { useErrorFocus } from '@/shared/hooks/useErrorFocus';
 import { useSession } from '@/features/auth/SessionProvider';
 import { Link, useLocation, useNavigate } from 'react-router';
 import { loginDestination } from '@/features/auth/authDestination';
@@ -12,6 +13,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const formRef = useErrorFocus(error);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
@@ -105,26 +107,29 @@ export default function LoginPage() {
           <p className="text-sm text-slate-500 mb-6">Enter your credentials to continue</p>
 
           {/* Quick login shortcuts */}
-          <div className="grid grid-cols-2 gap-2 mb-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-6">
             <button
               onClick={() => quickLogin('customer')}
               className="text-xs border border-dashed border-slate-300 rounded-lg p-2.5 text-slate-600 hover:bg-slate-50 hover:border-indigo-400 hover:text-indigo-600 transition-colors text-left"
             >
               <p className="font-semibold mb-0.5">Demo: Customer</p>
-              <p className="text-slate-400">customer@nexuscommerce.com</p>
+              <p className="text-slate-500">customer@nexuscommerce.com</p>
             </button>
             <button
               onClick={() => quickLogin('admin')}
               className="text-xs border border-dashed border-slate-300 rounded-lg p-2.5 text-slate-600 hover:bg-slate-50 hover:border-indigo-400 hover:text-indigo-600 transition-colors text-left"
             >
               <p className="font-semibold mb-0.5">Demo: Admin</p>
-              <p className="text-slate-400">admin@nexuscommerce.com</p>
+              <p className="text-slate-500">admin@nexuscommerce.com</p>
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <form ref={formRef} noValidate onSubmit={handleSubmit} className="flex flex-col gap-4">
             <Input
               label="Email address"
+              required
+              aria-invalid={!!error}
+              aria-describedby={error ? 'login-error' : undefined}
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -133,6 +138,9 @@ export default function LoginPage() {
             />
             <Input
               label="Password"
+              required
+              aria-invalid={!!error}
+              aria-describedby={error ? 'login-error' : undefined}
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -140,7 +148,11 @@ export default function LoginPage() {
               autoComplete="current-password"
             />
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-sm text-red-700">
+              <div
+                id="login-error"
+                role="alert"
+                className="bg-red-50 border border-red-200 rounded-lg px-4 py-3 text-sm text-red-700"
+              >
                 {error}
               </div>
             )}

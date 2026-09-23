@@ -1,3 +1,4 @@
+import { useErrorFocus } from '@/shared/hooks/useErrorFocus';
 import { useSession } from '@/features/auth/SessionProvider';
 import { useNotificationActions } from '@/shared/notifications/NotificationProvider';
 import { Link, useLocation, useNavigate } from 'react-router';
@@ -17,6 +18,7 @@ export default function RegisterPage() {
     confirm: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const formRef = useErrorFocus(errors);
   const [loading, setLoading] = useState(false);
 
   function validate() {
@@ -87,7 +89,7 @@ export default function RegisterPage() {
           <p className="text-sm text-slate-500 mb-6">
             Demo only: this account lasts until refresh. Use a demo password, not a real one.
           </p>
-          <form noValidate onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <form ref={formRef} noValidate onSubmit={handleSubmit} className="flex flex-col gap-4">
             <Input label="Full Name" placeholder="Alex Rivera" {...field('name')} />
             <Input
               label="Email Address"

@@ -1,3 +1,5 @@
+import ScrollRegion from '@/shared/ui/ScrollRegion';
+import { usePagination } from '@/shared/hooks/usePagination';
 import OrderStatusBadge from '@/features/orders/components/OrderStatusBadge';
 import PaymentStatusBadge from '@/features/payments/components/PaymentStatusBadge';
 import { useOrders } from '@/features/orders/useOrders';
@@ -13,7 +15,6 @@ export default function AdminOrdersPage() {
   const [search, setSearch] = useState('');
   const [orderStatusFilter, setOrderStatusFilter] = useState('all');
   const [paymentStatusFilter, setPaymentStatusFilter] = useState('all');
-  const [page, setPage] = useState(1);
   const [detailOrder, setDetailOrder] = useState<string | null>(null);
 
   const filtered = orders.filter((o) => {
@@ -25,7 +26,7 @@ export default function AdminOrdersPage() {
     return matchSearch && matchOrder && matchPayment;
   });
 
-  const totalPages = Math.ceil(filtered.length / PER_PAGE);
+  const { page, totalPages, setPage } = usePagination(filtered.length, PER_PAGE);
   const paginated = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
   const viewOrder = orders.find((o) => o.id === detailOrder);
@@ -47,7 +48,7 @@ export default function AdminOrdersPage() {
             fill="none"
             stroke="currentColor"
             strokeWidth="2"
-            className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"
+            className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2"
           >
             <path
               strokeLinecap="round"
@@ -56,6 +57,8 @@ export default function AdminOrdersPage() {
             />
           </svg>
           <input
+            aria-label="Search orders"
+            id="AdminOrdersPage-search-orders"
             placeholder="Search by order ID or customer…"
             value={search}
             onChange={(e) => {
@@ -66,6 +69,8 @@ export default function AdminOrdersPage() {
           />
         </div>
         <select
+          aria-label="Order status"
+          id="AdminOrdersPage-order-status"
           value={orderStatusFilter}
           onChange={(e) => {
             setOrderStatusFilter(e.target.value);
@@ -80,6 +85,8 @@ export default function AdminOrdersPage() {
           <option value="refunded">Refunded</option>
         </select>
         <select
+          aria-label="Payment status"
+          id="AdminOrdersPage-payment-status"
           value={paymentStatusFilter}
           onChange={(e) => {
             setPaymentStatusFilter(e.target.value);
@@ -96,29 +103,53 @@ export default function AdminOrdersPage() {
         </select>
       </div>
 
-      <div className="bg-white border border-slate-100 rounded-xl overflow-hidden mb-4">
-        <table className="w-full text-sm">
+      <ScrollRegion
+        label="Orders table"
+        className="bg-white border border-slate-100 rounded-xl  mb-4"
+      >
+        <table className="w-full min-w-[680px] text-sm">
           <thead>
             <tr className="bg-slate-50 border-b border-slate-100">
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+              <th
+                scope="col"
+                className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide"
+              >
                 Order ID
               </th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+              <th
+                scope="col"
+                className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide"
+              >
                 Customer
               </th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+              <th
+                scope="col"
+                className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide"
+              >
                 Date
               </th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+              <th
+                scope="col"
+                className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide"
+              >
                 Amount
               </th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+              <th
+                scope="col"
+                className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide"
+              >
                 Order Status
               </th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+              <th
+                scope="col"
+                className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide"
+              >
                 Payment
               </th>
-              <th className="text-right px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+              <th
+                scope="col"
+                className="text-right px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide"
+              >
                 Actions
               </th>
             </tr>
@@ -133,7 +164,7 @@ export default function AdminOrdersPage() {
                 </td>
                 <td className="px-5 py-3.5">
                   <p className="text-sm font-medium text-slate-900">{order.customerName}</p>
-                  <p className="text-xs text-slate-400">{order.customerEmail}</p>
+                  <p className="text-xs text-slate-500">{order.customerEmail}</p>
                 </td>
                 <td className="px-5 py-3.5 text-xs text-slate-500">
                   {new Date(order.createdAt).toLocaleDateString('en-US', {
@@ -163,7 +194,7 @@ export default function AdminOrdersPage() {
             ))}
           </tbody>
         </table>
-      </div>
+      </ScrollRegion>
       <div className="flex items-center justify-between">
         <p className="text-sm text-slate-500">{filtered.length} orders</p>
         <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
@@ -197,7 +228,7 @@ export default function AdminOrdersPage() {
                 },
               ].map(({ label, value }) => (
                 <div key={label}>
-                  <p className="text-xs text-slate-400 mb-0.5">{label}</p>
+                  <p className="text-xs text-slate-500 mb-0.5">{label}</p>
                   <p className="text-sm font-medium text-slate-800">{value}</p>
                 </div>
               ))}

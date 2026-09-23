@@ -30,7 +30,7 @@ function StatCard({
         {value}
       </p>
       <p className="text-sm font-medium text-slate-700">{label}</p>
-      {sub && <p className="text-xs text-slate-400 mt-0.5">{sub}</p>}
+      {sub && <p className="text-xs text-slate-500 mt-0.5">{sub}</p>}
     </div>
   );
 }
@@ -98,7 +98,7 @@ export default function AdminDashboard() {
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
-              className="w-5 h-5 text-emerald-600"
+              className="w-5 h-5 text-emerald-700"
             >
               <path
                 strokeLinecap="round"
@@ -118,7 +118,7 @@ export default function AdminDashboard() {
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
-              className="w-5 h-5 text-emerald-600"
+              className="w-5 h-5 text-emerald-700"
             >
               <path
                 strokeLinecap="round"
@@ -158,7 +158,7 @@ export default function AdminDashboard() {
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
-              className="w-5 h-5 text-amber-600"
+              className="w-5 h-5 text-amber-700"
             >
               <path
                 strokeLinecap="round"
@@ -179,7 +179,7 @@ export default function AdminDashboard() {
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
-              className="w-5 h-5 text-amber-600"
+              className="w-5 h-5 text-amber-700"
             >
               <path
                 strokeLinecap="round"
@@ -259,7 +259,7 @@ export default function AdminDashboard() {
               fill="none"
               stroke="currentColor"
               strokeWidth="2"
-              className="w-4 h-4 text-amber-600"
+              className="w-4 h-4 text-amber-700"
             >
               <path
                 strokeLinecap="round"
@@ -280,7 +280,7 @@ export default function AdminDashboard() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-xs font-medium text-slate-900 truncate">{p.name}</p>
-                  <p className="text-xs text-amber-600 font-medium">
+                  <p className="text-xs text-amber-700 font-medium">
                     {p.stock === 0 ? 'Out of stock' : `${p.stock} remaining`}
                   </p>
                 </div>

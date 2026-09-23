@@ -154,7 +154,7 @@ export default function OrderSuccessPage() {
         </LinkButton>
       </div>
 
-      <p className="text-center text-xs text-slate-400 mt-5">
+      <p className="text-center text-xs text-slate-500 mt-5">
         Demo receipt for <strong>{order.customerEmail}</strong>. No email was sent.
       </p>
     </div>

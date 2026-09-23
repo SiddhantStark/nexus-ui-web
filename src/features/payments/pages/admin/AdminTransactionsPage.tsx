@@ -1,3 +1,5 @@
+import ScrollRegion from '@/shared/ui/ScrollRegion';
+import { usePagination } from '@/shared/hooks/usePagination';
 import TransactionTypeBadge from '@/features/payments/components/TransactionTypeBadge';
 import TransactionStatusBadge from '@/features/payments/components/TransactionStatusBadge';
 import { usePayments } from '@/features/payments/usePayments';
@@ -11,7 +13,6 @@ export default function AdminTransactionsPage() {
   const [typeFilter, setTypeFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [search, setSearch] = useState('');
-  const [page, setPage] = useState(1);
 
   const filtered = transactions.filter((t) => {
     const matchSearch =
@@ -23,7 +24,7 @@ export default function AdminTransactionsPage() {
     return matchSearch && matchType && matchStatus;
   });
 
-  const totalPages = Math.ceil(filtered.length / PER_PAGE);
+  const { page, totalPages, setPage } = usePagination(filtered.length, PER_PAGE);
   const paginated = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
   const totalVolume = transactions
@@ -47,7 +48,7 @@ export default function AdminTransactionsPage() {
             fill="none"
             stroke="currentColor"
             strokeWidth="2"
-            className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"
+            className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2"
           >
             <path
               strokeLinecap="round"
@@ -56,6 +57,8 @@ export default function AdminTransactionsPage() {
             />
           </svg>
           <input
+            aria-label="Search transactions"
+            id="AdminTransactionsPage-search-transactions"
             placeholder="Search by ID, order, or customer…"
             value={search}
             onChange={(e) => {
@@ -65,7 +68,7 @@ export default function AdminTransactionsPage() {
             className="w-full pl-9 pr-3 py-2.5 text-sm border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400"
           />
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {['all', 'payment', 'refund'].map((f) => (
             <button
               key={f}
@@ -83,7 +86,7 @@ export default function AdminTransactionsPage() {
             </button>
           ))}
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           {['all', 'success', 'failed', 'pending'].map((f) => (
             <button
               key={f}
@@ -103,29 +106,53 @@ export default function AdminTransactionsPage() {
         </div>
       </div>
 
-      <div className="bg-white border border-slate-100 rounded-xl overflow-hidden mb-4">
-        <table className="w-full text-sm">
+      <ScrollRegion
+        label="Transactions table"
+        className="bg-white border border-slate-100 rounded-xl  mb-4"
+      >
+        <table className="w-full min-w-[680px] text-sm">
           <thead>
             <tr className="bg-slate-50 border-b border-slate-100">
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+              <th
+                scope="col"
+                className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide"
+              >
                 Transaction ID
               </th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+              <th
+                scope="col"
+                className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide"
+              >
                 Order ID
               </th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+              <th
+                scope="col"
+                className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide"
+              >
                 Customer
               </th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+              <th
+                scope="col"
+                className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide"
+              >
                 Type
               </th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+              <th
+                scope="col"
+                className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide"
+              >
                 Amount
               </th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+              <th
+                scope="col"
+                className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide"
+              >
                 Status
               </th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+              <th
+                scope="col"
+                className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide"
+              >
                 Date
               </th>
             </tr>
@@ -141,7 +168,7 @@ export default function AdminTransactionsPage() {
                 </td>
                 <td className="px-5 py-4">
                   <p className="text-sm font-medium text-slate-900">{tx.customerName}</p>
-                  <p className="text-xs text-slate-400">{tx.method}</p>
+                  <p className="text-xs text-slate-500">{tx.method}</p>
                 </td>
                 <td className="px-5 py-4">
                   <TransactionTypeBadge status={tx.type} />
@@ -165,7 +192,7 @@ export default function AdminTransactionsPage() {
                     year: 'numeric',
                   })}
                   <br />
-                  <span className="text-slate-400">
+                  <span className="text-slate-500">
                     {new Date(tx.createdAt).toLocaleTimeString('en-US', {
                       hour: '2-digit',
                       minute: '2-digit',
@@ -176,7 +203,7 @@ export default function AdminTransactionsPage() {
             ))}
           </tbody>
         </table>
-      </div>
+      </ScrollRegion>
       <div className="flex items-center justify-between">
         <p className="text-sm text-slate-500">{filtered.length} transactions</p>
         <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />

@@ -13,8 +13,9 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
   );
 
   return (
-    <div className="flex items-center gap-1">
+    <nav aria-label="Pagination" className="flex flex-wrap items-center gap-1">
       <button
+        aria-label="Previous page"
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
         className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
@@ -36,6 +37,8 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
           <span key={page} className="flex items-center gap-1">
             {showEllipsis && <span className="px-1 text-slate-400 text-sm">…</span>}
             <button
+              aria-label={`Page ${page}`}
+              aria-current={page === currentPage ? 'page' : undefined}
               onClick={() => onPageChange(page)}
               className={`w-8 h-8 flex items-center justify-center rounded-lg text-sm font-medium transition-colors ${
                 page === currentPage
@@ -49,6 +52,7 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
         );
       })}
       <button
+        aria-label="Next page"
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
         className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
@@ -63,6 +67,6 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
           <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
         </svg>
       </button>
-    </div>
+    </nav>
   );
 }

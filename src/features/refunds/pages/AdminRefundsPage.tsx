@@ -1,3 +1,5 @@
+import ScrollRegion from '@/shared/ui/ScrollRegion';
+import { usePagination } from '@/shared/hooks/usePagination';
 import RefundStatusBadge from '@/features/refunds/components/RefundStatusBadge';
 import { useRefunds } from '@/features/refunds/useRefunds';
 import { useState } from 'react';
@@ -10,7 +12,6 @@ export default function AdminRefundsPage() {
   const { refunds, resolveRefund } = useRefunds();
   const [statusFilter, setStatusFilter] = useState('all');
   const [search, setSearch] = useState('');
-  const [page, setPage] = useState(1);
   const [approveTarget, setApproveTarget] = useState<string | null>(null);
   const [rejectTarget, setRejectTarget] = useState<string | null>(null);
 
@@ -23,7 +24,7 @@ export default function AdminRefundsPage() {
     return matchSearch && matchStatus;
   });
 
-  const totalPages = Math.ceil(filtered.length / PER_PAGE);
+  const { page, totalPages, setPage } = usePagination(filtered.length, PER_PAGE);
   const paginated = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
   const approveRefund = refunds.find((r) => r.id === approveTarget);
@@ -109,7 +110,7 @@ export default function AdminRefundsPage() {
             fill="none"
             stroke="currentColor"
             strokeWidth="2"
-            className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"
+            className="w-4 h-4 text-slate-500 absolute left-3 top-1/2 -translate-y-1/2"
           >
             <path
               strokeLinecap="round"
@@ -118,6 +119,8 @@ export default function AdminRefundsPage() {
             />
           </svg>
           <input
+            aria-label="Search refunds"
+            id="AdminRefundsPage-search-refunds"
             placeholder="Search by refund ID, order, or customer…"
             value={search}
             onChange={(e) => {
@@ -129,29 +132,53 @@ export default function AdminRefundsPage() {
         </div>
       </div>
 
-      <div className="bg-white border border-slate-100 rounded-xl overflow-hidden mb-4">
-        <table className="w-full text-sm">
+      <ScrollRegion
+        label="Refunds table"
+        className="bg-white border border-slate-100 rounded-xl  mb-4"
+      >
+        <table className="w-full min-w-[680px] text-sm">
           <thead>
             <tr className="bg-slate-50 border-b border-slate-100">
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+              <th
+                scope="col"
+                className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide"
+              >
                 Refund ID
               </th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+              <th
+                scope="col"
+                className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide"
+              >
                 Order ID
               </th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+              <th
+                scope="col"
+                className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide"
+              >
                 Customer
               </th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+              <th
+                scope="col"
+                className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide"
+              >
                 Amount
               </th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+              <th
+                scope="col"
+                className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide"
+              >
                 Status
               </th>
-              <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+              <th
+                scope="col"
+                className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide"
+              >
                 Requested
               </th>
-              <th className="text-right px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+              <th
+                scope="col"
+                className="text-right px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide"
+              >
                 Actions
               </th>
             </tr>
@@ -170,7 +197,7 @@ export default function AdminRefundsPage() {
                 <td className="px-5 py-4">
                   <p className="text-sm font-medium text-slate-900">{refund.customerName}</p>
                   {refund.reason && (
-                    <p className="text-xs text-slate-400 truncate max-w-32">{refund.reason}</p>
+                    <p className="text-xs text-slate-500 truncate max-w-32">{refund.reason}</p>
                   )}
                 </td>
                 <td className="px-5 py-4 font-semibold text-slate-900">
@@ -191,7 +218,7 @@ export default function AdminRefundsPage() {
                     <div className="flex items-center gap-2 justify-end">
                       <button
                         onClick={() => setApproveTarget(refund.id)}
-                        className="text-xs text-emerald-600 hover:text-emerald-800 font-medium px-2 py-1 hover:bg-emerald-50 rounded-lg transition-colors"
+                        className="text-xs text-emerald-700 hover:text-emerald-800 font-medium px-2 py-1 hover:bg-emerald-50 rounded-lg transition-colors"
                       >
                         Approve
                       </button>
@@ -218,7 +245,7 @@ export default function AdminRefundsPage() {
             ))}
           </tbody>
         </table>
-      </div>
+      </ScrollRegion>
       <div className="flex items-center justify-between">
         <p className="text-sm text-slate-500">{filtered.length} refunds</p>
         <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />

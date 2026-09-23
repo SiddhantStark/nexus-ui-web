@@ -123,7 +123,7 @@ export default function AdminSidebar() {
   const { currentUser, logout } = useSession();
 
   return (
-    <aside className="w-60 shrink-0 bg-slate-900 flex flex-col min-h-screen">
+    <aside className="w-full lg:w-60 shrink-0 bg-slate-900 flex flex-col lg:min-h-screen">
       {/* Logo */}
       <div className="px-5 py-4 border-b border-slate-700/60">
         <Link to={'/admin'} className="flex items-center gap-2">
@@ -146,7 +146,10 @@ export default function AdminSidebar() {
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 px-3 py-4 flex flex-col gap-0.5">
+      <nav
+        aria-label="Admin navigation"
+        className="lg:flex-1 px-3 py-2 lg:py-4 grid grid-cols-2 sm:grid-cols-3 lg:flex lg:flex-col gap-0.5"
+      >
         {NAV_ITEMS.map(({ label, to, icon }) => {
           const active = pathname === to || (to !== '/admin' && pathname.startsWith(to + '/'));
           return (
@@ -168,8 +171,8 @@ export default function AdminSidebar() {
       </nav>
 
       {/* User */}
-      <div className="px-3 py-4 border-t border-slate-700/60">
-        <div className="flex items-center gap-3 px-3 py-2 mb-1">
+      <div className="px-3 py-2 lg:py-4 border-t border-slate-700/60">
+        <div className="hidden lg:flex items-center gap-3 px-3 py-2 mb-1">
           <div className="w-8 h-8 bg-indigo-500/20 rounded-full flex items-center justify-center shrink-0">
             <span className="text-xs font-semibold text-indigo-300">
               {currentUser?.name.charAt(0)}

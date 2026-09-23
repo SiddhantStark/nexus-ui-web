@@ -1,3 +1,4 @@
+import { useErrorFocus } from '@/shared/hooks/useErrorFocus';
 import { useCatalog } from '@/features/catalog/useCatalog';
 import LinkButton from '@/shared/ui/LinkButton';
 import { Link, useParams, useNavigate } from 'react-router';
@@ -26,6 +27,7 @@ export default function AddEditProductPage() {
     active: existing?.active ?? true,
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const formRef = useErrorFocus(errors);
   const [saving, setSaving] = useState(false);
 
   function validate() {
@@ -41,6 +43,7 @@ export default function AddEditProductPage() {
   }
 
   async function handleSave() {
+    if (saving) return;
     const errs = validate();
     setErrors(errs);
     if (Object.keys(errs).length) return;
@@ -93,7 +96,15 @@ export default function AddEditProductPage() {
         {isEdit ? 'Edit Product' : 'Add New Product'}
       </h1>
 
-      <div className="bg-white border border-slate-100 rounded-xl p-6 flex flex-col gap-4">
+      <form
+        ref={formRef}
+        noValidate
+        onSubmit={(event) => {
+          event.preventDefault();
+          void handleSave();
+        }}
+        className="bg-white border border-slate-100 rounded-xl p-4 sm:p-6 flex flex-col gap-4"
+      >
         {/* Preview */}
         {form.imageUrl && (
           <div className="aspect-video bg-slate-100 rounded-xl overflow-hidden mb-2">
@@ -110,16 +121,18 @@ export default function AddEditProductPage() {
           placeholder="https://images.unsplash.com/…"
           {...field('imageUrl')}
         />
-        <Input label="Product Name *" placeholder="ProBook Air 15" {...field('name')} />
+        <Input label="Product Name *" required placeholder="ProBook Air 15" {...field('name')} />
         <Textarea
           label="Description *"
+          required
           placeholder="Describe the product in detail…"
           rows={3}
           {...field('description')}
         />
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Select
             label="Category *"
+            required
             value={form.category}
             onChange={(e) => setForm((p) => ({ ...p, category: e.target.value }))}
           >
@@ -127,11 +140,12 @@ export default function AddEditProductPage() {
               <option key={c}>{c}</option>
             ))}
           </Select>
-          <Input label="SKU *" placeholder="ELEC-PBA15-001" {...field('sku')} />
+          <Input label="SKU *" required placeholder="ELEC-PBA15-001" {...field('sku')} />
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <Input
             label="Price ($) *"
+            required
             type="number"
             step="0.01"
             min="0"
@@ -140,6 +154,7 @@ export default function AddEditProductPage() {
           />
           <Input
             label="Stock Quantity *"
+            required
             type="number"
             min="0"
             placeholder="50"
@@ -160,14 +175,14 @@ export default function AddEditProductPage() {
         </div>
 
         <div className="flex gap-3 pt-2">
-          <Button loading={saving} onClick={handleSave}>
+          <Button type="submit" loading={saving}>
             {saving ? 'Saving…' : isEdit ? 'Save Changes' : 'Add Product'}
           </Button>
           <LinkButton variant="outline" to={'/admin/products'}>
             Cancel
           </LinkButton>
         </div>
-      </div>
+      </form>
     </div>
   );
 }

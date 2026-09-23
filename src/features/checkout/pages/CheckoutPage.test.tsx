@@ -51,6 +51,7 @@ async function ready() {
     </MemoryRouter>,
   );
   await user.click(screen.getByRole('button', { name: 'Begin checkout' }));
+  await screen.findByLabelText('Phone Number *');
   for (const [label, value] of Object.entries({
     'Phone Number *': '12345678',
     'Street Address *': '1 Test Street',
@@ -69,6 +70,18 @@ const finish = async () => {
 };
 
 describe('checkout simulation', () => {
+  it('submits with Enter, focuses invalid fields, and completes after correction', async () => {
+    const user = await ready();
+    const phone = screen.getByLabelText('Phone Number *');
+    await user.clear(phone);
+    await user.keyboard('{Enter}');
+    expect(phone).toHaveFocus();
+    expect(phone).toHaveAttribute('aria-invalid', 'true');
+    expect(phone).toHaveAccessibleDescription('Phone number is required.');
+    await user.type(phone, '12345678{Enter}');
+    await finish();
+    expect(screen.getByLabelText('Screen')).toHaveTextContent(/\/orders\/.+\/success/);
+  });
   it('commits only once on repeated clicks and navigates after success', async () => {
     const user = await ready();
     expect(screen.queryByLabelText('Card Number')).not.toBeInTheDocument();

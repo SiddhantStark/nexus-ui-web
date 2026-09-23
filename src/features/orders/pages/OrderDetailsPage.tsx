@@ -7,7 +7,7 @@ import { useRefunds } from '@/features/refunds/useRefunds';
 import { usePayments } from '@/features/payments/usePayments';
 import LinkButton from '@/shared/ui/LinkButton';
 import { useParams } from 'react-router';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import Button from '@/shared/ui/Button';
 import Breadcrumbs from '@/shared/ui/Breadcrumbs';
 import ConfirmDialog from '@/shared/ui/ConfirmDialog';
@@ -24,6 +24,8 @@ export default function OrderDetailsPage() {
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [showRefundDialog, setShowRefundDialog] = useState(false);
   const [refundReason, setRefundReason] = useState('');
+  const [refundError, setRefundError] = useState('');
+  const refundField = useRef<HTMLTextAreaElement>(null);
 
   if (!order) {
     return (
@@ -41,6 +43,11 @@ export default function OrderDetailsPage() {
     if (order && cancelOrder(order.id)) setShowCancelDialog(false);
   }
   function handleRefundRequest() {
+    if (!refundReason.trim()) {
+      setRefundError('Please provide a reason for your refund.');
+      refundField.current?.focus();
+      return;
+    }
     if (order && requestRefund(order.id, refundReason)) {
       setShowRefundDialog(false);
       setRefundReason('');
@@ -75,7 +82,14 @@ export default function OrderDetailsPage() {
             </Button>
           )}
           {canRefund && (
-            <Button variant="outline" size="sm" onClick={() => setShowRefundDialog(true)}>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setRefundError('');
+                setShowRefundDialog(true);
+              }}
+            >
               Request Refund
             </Button>
           )}
@@ -185,7 +199,7 @@ export default function OrderDetailsPage() {
                   },
                 ].map(({ label, value }) => (
                   <div key={label}>
-                    <p className="text-xs text-slate-400 mb-0.5">{label}</p>
+                    <p className="text-xs text-slate-500 mb-0.5">{label}</p>
                     <p className="text-sm font-medium text-slate-800 font-mono">{value}</p>
                   </div>
                 ))}
@@ -235,7 +249,7 @@ export default function OrderDetailsPage() {
           <div className="bg-white border border-slate-100 rounded-xl p-5">
             <h2 className="text-sm font-semibold text-slate-700 mb-3">Payment</h2>
             <p className="text-sm text-slate-600">{order.paymentMethod}</p>
-            <p className="text-xs text-slate-400 mt-1">
+            <p className="text-xs text-slate-500 mt-1">
               Order placed {new Date(order.createdAt).toLocaleDateString()}
             </p>
           </div>
@@ -275,6 +289,9 @@ export default function OrderDetailsPage() {
       >
         <Textarea
           label="Reason for refund *"
+          ref={refundField}
+          required
+          error={refundError}
           placeholder="e.g. Item arrived damaged, wrong product received…"
           value={refundReason}
           onChange={(e) => setRefundReason(e.target.value)}

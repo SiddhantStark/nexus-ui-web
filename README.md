@@ -50,7 +50,7 @@ Place `*.test.ts` or `*.test.tsx` beside the component/feature being tested. Imp
 
 Use `renderWithApp` from `src/test/renderWithApp.tsx` for components requiring the application providers. It creates fresh session, notification, and commerce providers inside MemoryRouter under StrictMode and returns a user-event session alongside Testing Library's render result. Use plain Testing Library `render` for provider-independent controls. Avoid shared mutable fixtures, snapshots of whole pages, and assertions on CSS classes/internal state. Await user interactions and assert visible outcomes.
 
-Initial coverage checks product-card/cart integration, out-of-stock behavior, and confirmation/cancellation actions. Regression tests cover registration, checkout failures/unmounts, stock limits, cancellation, refund rejection/completion, and repeated actions. These DOM tests do not verify real-browser layout, keyboard focus trapping, or complete commerce workflows; browser coverage remains later work. Testing setup follows [Vitest configuration](https://vitest.dev/guide/index.html) and [Testing Library setup](https://testing-library.com/docs/react-testing-library/setup/).
+Initial coverage checks product-card/cart integration, out-of-stock behavior, and confirmation/cancellation actions. Regression tests cover registration, checkout failures/unmounts, stock limits, cancellation, refund rejection/completion, and repeated actions. Phase 6 adds keyboard/focus regression tests and axe-core checks for representative forms, dialogs, and notifications. DOM tests cannot verify rendered layout or color contrast; manual browser checks are recorded in [accessibility and responsive usability](docs/accessibility.md). Full browser automation remains Phase 8 work. Testing setup follows [Vitest configuration](https://vitest.dev/guide/index.html) and [Testing Library setup](https://testing-library.com/docs/react-testing-library/setup/).
 
 ## Demo accounts and limitations
 
@@ -88,6 +88,7 @@ Routing regression tests cover direct links, registration redirects, ownership, 
 - `src/shared/ui/`: domain-independent controls; domain status labels and product cards live in their features.
 - `src/shared/notifications/`: notification state, timers, and stable notification commands.
 - `src/shared/lib/`: small domain-independent helpers/types.
+- `src/shared/hooks/`: shared form-error focus and bounded pagination.
 - `src/mocks/demo-store.ts`: coordinated in-memory commerce operations; `src/mocks/fixtures/` holds seed data.
 - `src/styles/index.css`: global styles and Tailwind entrypoint.
 - `src/test/`: shared testing utilities and dependency-boundary checks.
@@ -97,7 +98,7 @@ Routing regression tests cover direct links, registration redirects, ownership, 
 
 Features do not import app composition or concrete mock implementations. Shared code does not import features or business state. The architecture tests check these boundaries and circular runtime imports. Cross-feature operations remain behind the commerce contract; no API or DTO layers have been scaffolded. See [frontend architecture](docs/frontend-architecture.md) for ownership and extension guidance.
 
-See [screen baseline](../docs/frontend-screen-baseline.md) and the [step-by-step improvement plan](../docs/frontend-improvement-plan.md). Phases 1–5 are implemented; accessibility, resilience, end-to-end testing/CI, and backend integration remain later work.
+See [screen baseline](../docs/frontend-screen-baseline.md) and the [step-by-step improvement plan](../docs/frontend-improvement-plan.md). Phases 1–6 are implemented. See [accessibility and responsive usability](docs/accessibility.md) for Phase 6 behavior, verification, and extension guidance. Resilience, end-to-end testing/CI, and backend integration remain later work.
 
 ## Repository boundary
 

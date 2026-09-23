@@ -1,3 +1,4 @@
+import { usePagination } from '@/shared/hooks/usePagination';
 import OrderStatusBadge from '@/features/orders/components/OrderStatusBadge';
 import PaymentStatusBadge from '@/features/payments/components/PaymentStatusBadge';
 import { useMyOrders } from '@/features/orders/useOrders';
@@ -12,14 +13,13 @@ const PER_PAGE = 5;
 
 export default function MyOrdersPage() {
   const orders = useMyOrders();
-  const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState('all');
 
   const filtered =
     statusFilter === 'all'
       ? orders
       : orders.filter((o) => o.orderStatus === statusFilter || o.paymentStatus === statusFilter);
-  const totalPages = Math.ceil(filtered.length / PER_PAGE);
+  const { page, totalPages, setPage } = usePagination(filtered.length, PER_PAGE);
   const paginated = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
   return (

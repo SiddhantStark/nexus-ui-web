@@ -1,3 +1,5 @@
+import ScrollRegion from '@/shared/ui/ScrollRegion';
+import { usePagination } from '@/shared/hooks/usePagination';
 import TransactionTypeBadge from '@/features/payments/components/TransactionTypeBadge';
 import TransactionStatusBadge from '@/features/payments/components/TransactionStatusBadge';
 import { useMyTransactions } from '@/features/payments/usePayments';
@@ -13,7 +15,6 @@ export default function TransactionHistoryPage() {
   const transactions = useMyTransactions();
   const [typeFilter, setTypeFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [page, setPage] = useState(1);
 
   const filtered = transactions.filter((t) => {
     if (typeFilter !== 'all' && t.type !== typeFilter) return false;
@@ -21,7 +22,7 @@ export default function TransactionHistoryPage() {
     return true;
   });
 
-  const totalPages = Math.ceil(filtered.length / PER_PAGE);
+  const { page, totalPages, setPage } = usePagination(filtered.length, PER_PAGE);
   const paginated = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
   const totalPaid = transactions
@@ -37,7 +38,7 @@ export default function TransactionHistoryPage() {
       <h1 className="text-2xl font-bold text-slate-900 mb-6">Transaction History</h1>
 
       {/* Summary */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         {[
           {
             label: 'Total Spent',
@@ -67,7 +68,7 @@ export default function TransactionHistoryPage() {
 
       {/* Filters */}
       <div className="bg-white border border-slate-100 rounded-xl p-4 mb-5 flex flex-wrap gap-3 items-center">
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <span className="text-xs font-medium text-slate-500 self-center">Type:</span>
           {['all', 'payment', 'refund'].map((f) => (
             <button
@@ -86,7 +87,7 @@ export default function TransactionHistoryPage() {
             </button>
           ))}
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <span className="text-xs font-medium text-slate-500 self-center">Status:</span>
           {['all', 'success', 'failed', 'pending'].map((f) => (
             <button
@@ -114,26 +115,47 @@ export default function TransactionHistoryPage() {
         />
       ) : (
         <>
-          <div className="bg-white border border-slate-100 rounded-xl overflow-hidden mb-4">
-            <table className="w-full text-sm">
+          <ScrollRegion
+            label="Transaction history table"
+            className="bg-white border border-slate-100 rounded-xl  mb-4"
+          >
+            <table className="w-full min-w-[680px] text-sm">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-100">
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                  <th
+                    scope="col"
+                    className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide"
+                  >
                     Transaction ID
                   </th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                  <th
+                    scope="col"
+                    className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide"
+                  >
                     Order
                   </th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                  <th
+                    scope="col"
+                    className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide"
+                  >
                     Type
                   </th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                  <th
+                    scope="col"
+                    className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide"
+                  >
                     Amount
                   </th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                  <th
+                    scope="col"
+                    className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide"
+                  >
                     Status
                   </th>
-                  <th className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                  <th
+                    scope="col"
+                    className="text-left px-5 py-3.5 text-xs font-semibold text-slate-500 uppercase tracking-wide"
+                  >
                     Date
                   </th>
                 </tr>
@@ -178,7 +200,7 @@ export default function TransactionHistoryPage() {
                 ))}
               </tbody>
             </table>
-          </div>
+          </ScrollRegion>
           <div className="flex items-center justify-between">
             <p className="text-sm text-slate-500">
               {filtered.length} transaction{filtered.length !== 1 ? 's' : ''}

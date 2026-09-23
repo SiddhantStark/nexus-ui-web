@@ -1,5 +1,5 @@
+import { useErrorFocus } from '@/shared/hooks/useErrorFocus';
 import { useSession } from '@/features/auth/SessionProvider';
-import { useNotificationActions } from '@/shared/notifications/NotificationProvider';
 import { useCart } from '@/features/cart/useCart';
 import { useCheckout } from '@/features/checkout/useCheckout';
 import LinkButton from '@/shared/ui/LinkButton';
@@ -17,7 +17,6 @@ type CheckoutStep = 'form' | 'processing';
 export default function CheckoutPage() {
   const navigate = useNavigate();
   const { currentUser } = useSession();
-  const { addToast } = useNotificationActions();
   const { cart, cartTotal, cartVersion, cartProblems } = useCart();
   const { checkout } = useCheckout();
   const [step, setStep] = useState<CheckoutStep>('form');
@@ -41,6 +40,7 @@ export default function CheckoutPage() {
     postalCode: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const formRef = useErrorFocus(errors);
 
   function validate() {
     const errs: Record<string, string> = {};
@@ -59,7 +59,6 @@ export default function CheckoutPage() {
     const errs = validate();
     setErrors(errs);
     if (Object.keys(errs).length) {
-      addToast('Please fill in all required fields', 'error');
       return;
     }
     if (cartProblems.length) {
@@ -101,13 +100,17 @@ export default function CheckoutPage() {
   // Processing state
   if (step === 'processing') {
     return (
-      <div className="min-h-[70vh] flex flex-col items-center justify-center gap-5 px-6">
+      <div
+        role="status"
+        aria-live="polite"
+        className="min-h-[70vh] flex flex-col items-center justify-center gap-5 px-6"
+      >
         <div className="w-16 h-16 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin" />
         <div className="text-center">
           <h2 className="text-xl font-bold text-slate-900 mb-1">Processing your order</h2>
           <p className="text-sm text-slate-500">Checking demo inventory and simulating payment…</p>
         </div>
-        <div className="flex flex-col gap-2 text-xs text-slate-400">
+        <div className="flex flex-col gap-2 text-xs text-slate-500">
           <div className="flex items-center gap-2">
             <span className="w-2 h-2 bg-emerald-400 rounded-full" />
             Checking inventory availability
@@ -143,11 +146,19 @@ export default function CheckoutPage() {
         </p>
       ))}
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <form
+        ref={formRef}
+        noValidate
+        onSubmit={(event) => {
+          event.preventDefault();
+          handlePlaceOrder();
+        }}
+        className="grid grid-cols-1 lg:grid-cols-3 gap-6"
+      >
         {/* Left: Delivery + Payment */}
         <div className="lg:col-span-2 flex flex-col gap-5">
           {/* Delivery info */}
-          <div className="bg-white border border-slate-100 rounded-xl p-6">
+          <div className="bg-white border border-slate-100 rounded-xl p-4 sm:p-6">
             <h2 className="font-semibold text-slate-900 mb-4 flex items-center gap-2">
               <span className="w-6 h-6 bg-indigo-600 text-white text-xs font-bold rounded-full flex items-center justify-center">
                 1
@@ -155,15 +166,17 @@ export default function CheckoutPage() {
               Delivery Information
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Input label="Full Name *" placeholder="Alex Rivera" {...field('name')} />
+              <Input label="Full Name *" required placeholder="Alex Rivera" {...field('name')} />
               <Input
                 label="Email Address *"
+                required
                 type="email"
                 placeholder="alex@example.com"
                 {...field('email')}
               />
               <Input
                 label="Phone Number *"
+                required
                 type="tel"
                 placeholder="+1 (555) 000-0000"
                 {...field('phone')}
@@ -171,17 +184,18 @@ export default function CheckoutPage() {
               <div className="sm:col-span-2">
                 <Input
                   label="Street Address *"
+                  required
                   placeholder="742 Evergreen Terrace"
                   {...field('address')}
                 />
               </div>
-              <Input label="City *" placeholder="Springfield" {...field('city')} />
-              <Input label="State *" placeholder="IL" {...field('state')} />
-              <Input label="Postal Code *" placeholder="62701" {...field('postalCode')} />
+              <Input label="City *" required placeholder="Springfield" {...field('city')} />
+              <Input label="State *" required placeholder="IL" {...field('state')} />
+              <Input label="Postal Code *" required placeholder="62701" {...field('postalCode')} />
             </div>
           </div>
 
-          <div className="bg-white border border-slate-100 rounded-xl p-6">
+          <div className="bg-white border border-slate-100 rounded-xl p-4 sm:p-6">
             <h2 className="font-semibold text-slate-900 mb-4">Simulated Payment</h2>
             <p className="text-sm text-slate-600">
               Demo only. No card details are collected and no real charge is made. All orders reset
@@ -205,10 +219,12 @@ export default function CheckoutPage() {
                 ).map((s) => (
                   <button
                     key={s.id}
+                    type="button"
+                    aria-pressed={testScenario === s.id}
                     onClick={() => setTestScenario(s.id)}
                     className={`text-xs px-3 py-1.5 rounded-lg font-medium border transition-colors ${
                       testScenario === s.id
-                        ? 'bg-amber-600 text-white border-amber-600'
+                        ? 'bg-amber-700 text-white border-amber-700'
                         : 'bg-white text-amber-700 border-amber-300 hover:bg-amber-100'
                     }`}
                   >
@@ -253,22 +269,17 @@ export default function CheckoutPage() {
               </div>
               <div className="flex justify-between text-slate-600">
                 <span>Shipping</span>
-                <span className="text-emerald-600 font-medium">Free</span>
+                <span className="text-emerald-700 font-medium">Free</span>
               </div>
               <div className="flex justify-between font-bold text-slate-900 text-base border-t border-slate-100 pt-2">
                 <span>Total</span>
                 <span>${cartTotal.toFixed(2)}</span>
               </div>
             </div>
-            <Button
-              fullWidth
-              size="lg"
-              disabled={cartProblems.length > 0}
-              onClick={handlePlaceOrder}
-            >
+            <Button fullWidth size="lg" disabled={cartProblems.length > 0} type="submit">
               Place Demo Order · ${cartTotal.toFixed(2)}
             </Button>
-            <div className="mt-3 flex items-center justify-center gap-1.5 text-xs text-slate-400">
+            <div className="mt-3 flex items-center justify-center gap-1.5 text-xs text-slate-500">
               <svg
                 viewBox="0 0 24 24"
                 fill="none"
@@ -286,7 +297,7 @@ export default function CheckoutPage() {
             </div>
           </div>
         </div>
-      </div>
+      </form>
     </div>
   );
 }

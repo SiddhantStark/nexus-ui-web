@@ -45,7 +45,7 @@ export default function CartPage() {
       <Breadcrumbs crumbs={[{ label: 'Home', to: '/' }, { label: 'Cart' }]} />
       <h1 className="text-2xl font-bold text-slate-900 mb-6">
         Shopping Cart{' '}
-        <span className="text-slate-400 font-normal text-lg">
+        <span className="text-slate-500 font-normal text-lg">
           ({itemCount} {itemCount === 1 ? 'item' : 'items'})
         </span>
       </h1>
@@ -86,7 +86,7 @@ export default function CartPage() {
                   <button
                     aria-label={`Remove ${item.product.name}`}
                     onClick={() => removeFromCart(item.product.id)}
-                    className="text-slate-400 hover:text-red-500 transition-colors p-1 rounded"
+                    className="text-slate-500 hover:text-red-500 transition-colors p-1 rounded"
                   >
                     <svg
                       viewBox="0 0 24 24"
@@ -106,6 +106,7 @@ export default function CartPage() {
                 <div className="flex items-center justify-between mt-3">
                   <div className="flex items-center gap-0 border border-slate-200 rounded-lg overflow-hidden">
                     <button
+                      aria-label={`Decrease quantity of ${item.product.name}`}
                       onClick={() => updateCartQuantity(item.product.id, item.quantity - 1)}
                       className="w-8 h-8 flex items-center justify-center text-slate-600 hover:bg-slate-100 transition-colors text-sm font-bold"
                     >
@@ -115,6 +116,7 @@ export default function CartPage() {
                       {item.quantity}
                     </span>
                     <button
+                      aria-label={`Increase quantity of ${item.product.name}`}
                       onClick={() =>
                         updateCartQuantity(
                           item.product.id,
@@ -155,7 +157,7 @@ export default function CartPage() {
               ))}
               <div className="border-t border-slate-100 pt-2.5 flex justify-between text-slate-600">
                 <span>Shipping</span>
-                <span className="text-emerald-600 font-medium">Free</span>
+                <span className="text-emerald-700 font-medium">Free</span>
               </div>
               <div className="border-t border-slate-100 pt-2.5 flex justify-between font-bold text-slate-900 text-base">
                 <span>Total</span>
@@ -171,7 +173,7 @@ export default function CartPage() {
             >
               Continue Shopping
             </Link>
-            <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-center gap-2 text-xs text-slate-400">
+            <div className="mt-4 pt-4 border-t border-slate-100 flex items-center justify-center gap-2 text-xs text-slate-500">
               <svg
                 viewBox="0 0 24 24"
                 fill="none"

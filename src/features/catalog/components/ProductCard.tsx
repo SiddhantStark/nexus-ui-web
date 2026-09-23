@@ -40,7 +40,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         )}
         {lowStock && !outOfStock && (
           <div className="absolute top-2 right-2">
-            <span className="bg-amber-500 text-white text-xs font-medium px-2 py-0.5 rounded-full">
+            <span className="bg-amber-700 text-white text-xs font-medium px-2 py-0.5 rounded-full">
               Only {product.stock} left
             </span>
           </div>

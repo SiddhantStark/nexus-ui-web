@@ -32,7 +32,7 @@ This is the canonical project structure. Start with task-relevant files below. O
 
 ## Dependencies
 
-- Runtime: React 19, React DOM 19, and React Router 7
+- Runtime: React 19, React DOM 19, React Router 7, and Radix Dialog
 - Styling: Tailwind CSS v4 with the `@tailwindcss/vite` plugin
 - Build tooling: Vite 8, TypeScript 5.7, and `@vitejs/plugin-react`
 - Formatting: oxfmt
@@ -62,3 +62,11 @@ Vitest uses a separate `vitest.config.ts` with jsdom and `src/test/setup.ts`. Co
 Use `@/` imports for cross-directory source references. App code composes features and injects mock implementations. Feature production code must not import `app/`, `mocks/`, or test helpers. Shared production code must not import app, features, or mocks. Features may use other features through focused hooks/components or type-only contracts; avoid circular runtime imports. The commerce contract is an intentional coordination boundary for atomic checkout/refund/inventory operations, not a general catch-all context. Keep new frontend types with their owner, and do not recreate a `types/index.ts` barrel or `useApp` facade. Shared badges accept labels/styles; feature badges own status meaning.
 
 Run `src/test/architecture.test.ts` with the regular test suite. Test files may use app providers and mock fixtures. Add cart display fields through selectors from the current catalog, not by duplicating products in stored cart entries. Preserve historical order snapshots.
+
+## Accessibility and responsive behavior
+
+Use the shared Input/Select/Textarea for visible labels and associated helper/errors. Use native form submission and explicitly mark submit buttons; shared Button defaults to `type="button"`. Give icon controls meaningful accessible names. Use shared Modal/ConfirmDialog (Radix Dialog) for focus containment, Escape, initial focus, and restoration. ConfirmDialog starts focus on Cancel; form dialogs focus their first field. Keep required validation inside the dialog.
+
+Wrap wide tables in shared ScrollRegion with a meaningful label and column header scopes. Keep the surrounding flex/grid children shrinkable; fix page overflow rather than hiding it on the body. Use usePagination for local lists that can shrink; shareable catalog pagination remains in the URL. Preserve visible focus styles and the reduced-motion override. See docs/accessibility.md for the manual checks to repeat.
+
+Use `src/test/checkAccessibility.ts` for representative axe-core checks. Its jsdom run deliberately excludes color contrast; inspect actual rendered colors and responsive layouts in a browser. Automated rules do not establish complete accessibility compliance. The two targeted lint exceptions cover a keyboard-scrollable region and a bubbling Escape handler on the header; do not disable accessibility rules globally.

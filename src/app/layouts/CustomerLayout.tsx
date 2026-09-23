@@ -4,8 +4,11 @@ import Navbar from '@/app/layouts/Navbar';
 export default function CustomerLayout() {
   return (
     <div className="min-h-screen bg-slate-50">
+      <a href="#main-content" className="skip-link">
+        Skip to content
+      </a>
       <Navbar />
-      <main>
+      <main id="main-content" tabIndex={-1}>
         <Outlet />
       </main>
       <footer className="bg-slate-900 text-slate-400 mt-16">

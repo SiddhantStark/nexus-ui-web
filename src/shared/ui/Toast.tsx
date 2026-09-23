@@ -1,7 +1,10 @@
+import { useRef } from 'react';
 import { useNotifications } from '@/shared/notifications/NotificationProvider';
 import type { Toast } from '@/shared/notifications/types';
 
-function ToastItem({ toast, onRemove }: { toast: Toast; onRemove: (id: string) => void }) {
+function ToastItem({ toast }: { toast: Toast }) {
+  const { removeToast, pauseToast, resumeToast } = useNotifications();
+  const hovered = useRef(false);
   const icons = {
     success: (
       <svg
@@ -66,17 +69,35 @@ function ToastItem({ toast, onRemove }: { toast: Toast; onRemove: (id: string) =
   };
 
   return (
-    <div className="flex items-start gap-3 bg-white border border-slate-200 rounded-xl shadow-lg p-3.5 min-w-72 max-w-sm animate-slide-in">
+    <div
+      onMouseEnter={() => {
+        hovered.current = true;
+        pauseToast(toast.id);
+      }}
+      onMouseLeave={(event) => {
+        hovered.current = false;
+        if (!event.currentTarget.contains(document.activeElement)) resumeToast(toast.id);
+      }}
+      onFocus={() => pauseToast(toast.id)}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget) && !hovered.current)
+          resumeToast(toast.id);
+      }}
+      className="flex items-start gap-3 bg-white border border-slate-200 rounded-xl shadow-lg p-3.5 w-full min-w-0 animate-slide-in"
+    >
       {icons[toast.type]}
       <p
         role={toast.type === 'error' ? 'alert' : 'status'}
-        className="text-sm text-slate-800 flex-1 leading-snug"
+        aria-atomic="true"
+        className="text-sm text-slate-800 flex-1 min-w-0 break-words leading-snug"
       >
         {toast.message}
       </p>
       <button
-        onClick={() => onRemove(toast.id)}
-        className="text-slate-400 hover:text-slate-600 ml-1"
+        type="button"
+        aria-label="Dismiss notification"
+        onClick={() => removeToast(toast.id)}
+        className="text-slate-600 hover:text-slate-900 p-1 shrink-0"
       >
         <svg
           viewBox="0 0 24 24"
@@ -93,13 +114,16 @@ function ToastItem({ toast, onRemove }: { toast: Toast; onRemove: (id: string) =
 }
 
 export default function ToastContainer() {
-  const { toasts, removeToast } = useNotifications();
+  const { toasts } = useNotifications();
   if (!toasts.length) return null;
   return (
-    <div className="fixed bottom-6 right-6 z-[100] flex flex-col gap-2">
+    <section
+      aria-label="Notifications"
+      className="fixed bottom-4 right-4 z-[100] w-[calc(100%_-_2rem)] max-w-sm max-h-[50dvh] overflow-y-auto flex flex-col gap-2"
+    >
       {toasts.map((t) => (
-        <ToastItem key={t.id} toast={t} onRemove={removeToast} />
+        <ToastItem key={t.id} toast={t} />
       ))}
-    </div>
+    </section>
   );
 }

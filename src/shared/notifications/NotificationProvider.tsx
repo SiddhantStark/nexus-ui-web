@@ -12,6 +12,7 @@ import type { Toast } from './types';
 function useNotificationState() {
   const [toasts, setToasts] = useState<Toast[]>([]);
   const timers = useRef(new Map<string, ReturnType<typeof setTimeout>>());
+  const active = useRef(new Map<string, Toast['type']>());
   useEffect(() => {
     const activeTimers = timers.current;
     return () => {
@@ -22,21 +23,34 @@ function useNotificationState() {
   const removeToast = useCallback((id: string) => {
     clearTimeout(timers.current.get(id));
     timers.current.delete(id);
+    active.current.delete(id);
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
+  const pauseToast = useCallback((id: string) => {
+    clearTimeout(timers.current.get(id));
+    timers.current.delete(id);
+  }, []);
+  const resumeToast = useCallback(
+    (id: string) => {
+      pauseToast(id);
+      if (!active.current.has(id) || active.current.get(id) === 'error') return;
+      timers.current.set(
+        id,
+        setTimeout(() => removeToast(id), 8000),
+      );
+    },
+    [pauseToast, removeToast],
+  );
   const addToast = useCallback(
     (message: string, type: Toast['type'] = 'info') => {
       const id = crypto.randomUUID();
-      setToasts((prev) => [...prev, { id, message, type }]);
-      timers.current.set(
-        id,
-        setTimeout(() => removeToast(id), 4000),
-      );
+      active.current.set(id, type);
+      setToasts((previous) => [...previous, { id, message, type }]);
+      resumeToast(id);
     },
-    [removeToast],
+    [resumeToast],
   );
-
-  return { toasts, addToast, removeToast };
+  return { toasts, addToast, removeToast, pauseToast, resumeToast };
 }
 const NotificationContext = createContext<ReturnType<typeof useNotificationState> | null>(null);
 type NotificationActions = Pick<

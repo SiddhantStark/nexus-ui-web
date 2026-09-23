@@ -21,6 +21,8 @@ export default function Button({
 }: ButtonProps) {
   return (
     <button
+      type="button"
+      aria-busy={loading || undefined}
       className={buttonClassName({ variant, size, fullWidth, className })}
       disabled={disabled || loading}
       {...props}

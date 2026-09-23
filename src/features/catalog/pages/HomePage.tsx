@@ -126,13 +126,13 @@ export default function HomePage() {
       <div className="max-w-7xl mx-auto px-6">
         {/* Categories */}
         <section className="py-12">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
             <h2 className="text-2xl font-bold text-slate-900">Browse Categories</h2>
             <Link to={'/products'} className="text-sm text-indigo-600 font-medium hover:underline">
               View all →
             </Link>
           </div>
-          <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
             {CATEGORIES.map(({ name, emoji, count, color }) => (
               <Link
                 key={name}
@@ -141,7 +141,7 @@ export default function HomePage() {
               >
                 <span className="text-2xl">{emoji}</span>
                 <span className="leading-none">{name}</span>
-                <span className="text-xs opacity-60">{count} items</span>
+                <span className="text-xs">{count} items</span>
               </Link>
             ))}
           </div>
@@ -149,7 +149,7 @@ export default function HomePage() {
 
         {/* Featured Products */}
         <section className="pb-12">
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
             <div>
               <h2 className="text-2xl font-bold text-slate-900">Featured Products</h2>
               <p className="text-sm text-slate-500 mt-0.5">Handpicked for you this week</p>
@@ -172,7 +172,7 @@ export default function HomePage() {
               <div>
                 <p className="text-indigo-400 text-sm font-medium mb-1">Most Popular</p>
                 <h2 className="text-2xl font-bold text-white">{"Customers' favorites"}</h2>
-                <p className="text-slate-400 text-sm mt-1">
+                <p className="text-slate-300 text-sm mt-1">
                   Top-rated products across all categories
                 </p>
               </div>
