@@ -1,3 +1,4 @@
+import { lineTotal, sumMoney } from '@/shared/lib/money';
 import { useCommerceSlice, useCommerceStore } from '@/features/commerce/CommerceProvider';
 import { useNotificationActions } from '@/shared/notifications/NotificationProvider';
 import { useOperationFeedback } from '@/shared/notifications/useOperationFeedback';
@@ -15,9 +16,7 @@ export function useCart() {
     cart,
     cartVersion,
     cartProblems: cartProblems({ cart: entries, products }),
-    cartTotal:
-      cart.reduce((sum, item) => sum + Math.round(item.product.price * 100) * item.quantity, 0) /
-      100,
+    cartTotal: sumMoney(cart.map((item) => lineTotal(item.product.price, item.quantity))),
     cartCount: entries.reduce((sum, item) => sum + item.quantity, 0),
     addToCart: (product: Product, quantity = 1) =>
       report(store.addToCart(product.id, quantity), `${quantity}× ${product.name} added to cart`),

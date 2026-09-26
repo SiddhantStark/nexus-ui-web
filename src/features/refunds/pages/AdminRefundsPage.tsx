@@ -1,3 +1,5 @@
+import { sumMoney } from '@/shared/lib/money';
+import { formatCurrency, formatDate } from '@/shared/lib/format';
 import ScrollRegion from '@/shared/ui/ScrollRegion';
 import { usePagination } from '@/shared/hooks/usePagination';
 import RefundStatusBadge from '@/features/refunds/components/RefundStatusBadge';
@@ -37,9 +39,7 @@ export default function AdminRefundsPage() {
     if (rejectRefund && resolveRefund(rejectRefund.id, 'rejected')) setRejectTarget(null);
   }
 
-  const totalPending = refunds
-    .filter((r) => r.status === 'pending')
-    .reduce((s, r) => s + r.amount, 0);
+  const totalPending = sumMoney(refunds.filter((r) => r.status === 'pending').map((r) => r.amount));
 
   return (
     <div className="animate-fade-in">
@@ -47,7 +47,7 @@ export default function AdminRefundsPage() {
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Refunds</h1>
           <p className="text-sm text-slate-500 mt-0.5">
-            {refunds.length} refund requests · Pending: ${totalPending.toFixed(2)}
+            {refunds.length} refund requests · Pending: {formatCurrency(totalPending)}
           </p>
         </div>
       </div>
@@ -201,17 +201,13 @@ export default function AdminRefundsPage() {
                   )}
                 </td>
                 <td className="px-5 py-4 font-semibold text-slate-900">
-                  ${refund.amount.toFixed(2)}
+                  {formatCurrency(refund.amount)}
                 </td>
                 <td className="px-5 py-4">
                   <RefundStatusBadge status={refund.status} />
                 </td>
                 <td className="px-5 py-4 text-xs text-slate-500">
-                  {new Date(refund.requestedAt).toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric',
-                  })}
+                  {formatDate(refund.requestedAt)}
                 </td>
                 <td className="px-5 py-4">
                   {refund.status === 'pending' && (
@@ -254,7 +250,7 @@ export default function AdminRefundsPage() {
       <ConfirmDialog
         open={!!approveTarget}
         title="Approve refund?"
-        message={`Process a refund of $${approveRefund?.amount.toFixed(2)} for ${approveRefund?.customerName}. This records a simulated reversal; no real money is moved.`}
+        message={`Process a refund of ${formatCurrency(approveRefund?.amount)} for ${approveRefund?.customerName}. This records a simulated reversal; no real money is moved.`}
         confirmLabel="Approve Refund"
         variant="primary"
         onConfirm={handleApprove}
@@ -264,7 +260,7 @@ export default function AdminRefundsPage() {
       <ConfirmDialog
         open={!!rejectTarget}
         title="Reject refund request?"
-        message={`Refund request ${rejectRefund?.id} for $${rejectRefund?.amount.toFixed(2)} will be rejected. The demo payment returns to paid; no message is sent.`}
+        message={`Refund request ${rejectRefund?.id} for ${formatCurrency(rejectRefund?.amount)} will be rejected. The demo payment returns to paid; no message is sent.`}
         confirmLabel="Reject Request"
         variant="danger"
         onConfirm={handleReject}

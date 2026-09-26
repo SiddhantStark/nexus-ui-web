@@ -1,3 +1,5 @@
+import { sumMoney } from '@/shared/lib/money';
+import { formatCurrency, formatDate } from '@/shared/lib/format';
 import ScrollRegion from '@/shared/ui/ScrollRegion';
 import { usePagination } from '@/shared/hooks/usePagination';
 import TransactionTypeBadge from '@/features/payments/components/TransactionTypeBadge';
@@ -25,12 +27,12 @@ export default function TransactionHistoryPage() {
   const { page, totalPages, setPage } = usePagination(filtered.length, PER_PAGE);
   const paginated = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
-  const totalPaid = transactions
-    .filter((t) => t.type === 'payment' && t.status === 'success')
-    .reduce((s, t) => s + t.amount, 0);
-  const totalRefunded = transactions
-    .filter((t) => t.type === 'refund' && t.status === 'success')
-    .reduce((s, t) => s + t.amount, 0);
+  const totalPaid = sumMoney(
+    transactions.filter((t) => t.type === 'payment' && t.status === 'success').map((t) => t.amount),
+  );
+  const totalRefunded = sumMoney(
+    transactions.filter((t) => t.type === 'refund' && t.status === 'success').map((t) => t.amount),
+  );
 
   return (
     <div className="max-w-5xl mx-auto px-6 py-8 animate-fade-in">
@@ -42,19 +44,19 @@ export default function TransactionHistoryPage() {
         {[
           {
             label: 'Total Spent',
-            value: `$${totalPaid.toFixed(2)}`,
+            value: `${formatCurrency(totalPaid)}`,
             color: 'text-slate-900',
             bg: 'bg-white',
           },
           {
             label: 'Total Refunded',
-            value: `$${totalRefunded.toFixed(2)}`,
+            value: `${formatCurrency(totalRefunded)}`,
             color: 'text-violet-700',
             bg: 'bg-violet-50',
           },
           {
             label: 'Net Spent',
-            value: `$${(totalPaid - totalRefunded).toFixed(2)}`,
+            value: `${formatCurrency(sumMoney([totalPaid, -totalRefunded]))}`,
             color: 'text-indigo-700',
             bg: 'bg-indigo-50',
           },
@@ -183,19 +185,14 @@ export default function TransactionHistoryPage() {
                           tx.type === 'refund' ? 'text-violet-700' : 'text-slate-900'
                         }`}
                       >
-                        {tx.type === 'refund' ? '+' : ''}${tx.amount.toFixed(2)}
+                        {tx.type === 'refund' ? '+' : ''}
+                        {formatCurrency(tx.amount)}
                       </span>
                     </td>
                     <td className="px-5 py-4">
                       <TransactionStatusBadge status={tx.status} />
                     </td>
-                    <td className="px-5 py-4 text-xs text-slate-500">
-                      {new Date(tx.createdAt).toLocaleDateString('en-US', {
-                        month: 'short',
-                        day: 'numeric',
-                        year: 'numeric',
-                      })}
-                    </td>
+                    <td className="px-5 py-4 text-xs text-slate-500">{formatDate(tx.createdAt)}</td>
                   </tr>
                 ))}
               </tbody>

@@ -1,3 +1,6 @@
+import { lineTotal } from '@/shared/lib/money';
+import { formatCurrency } from '@/shared/lib/format';
+import Image from '@/shared/ui/Image';
 import { useCart } from '@/features/cart/useCart';
 import LinkButton from '@/shared/ui/LinkButton';
 import { Link } from 'react-router';
@@ -67,7 +70,7 @@ export default function CartPage() {
                 className="w-20 h-20 rounded-lg overflow-hidden bg-slate-50 shrink-0 cursor-pointer"
                 to={`/products/${encodeURIComponent(item.product.id)}`}
               >
-                <img
+                <Image
                   src={item.product.imageUrl || undefined}
                   alt={item.product.name}
                   className="w-full h-full object-cover"
@@ -130,9 +133,11 @@ export default function CartPage() {
                   </div>
                   <div className="text-right">
                     <p className="font-bold text-slate-900">
-                      ${(item.product.price * item.quantity).toFixed(2)}
+                      {formatCurrency(lineTotal(item.product.price, item.quantity))}
                     </p>
-                    <p className="text-xs text-slate-500">${item.product.price.toFixed(2)} each</p>
+                    <p className="text-xs text-slate-500">
+                      {formatCurrency(item.product.price)} each
+                    </p>
                   </div>
                 </div>
               </div>
@@ -151,7 +156,7 @@ export default function CartPage() {
                     {item.product.name} ×{item.quantity}
                   </span>
                   <span className="font-medium shrink-0">
-                    ${(item.product.price * item.quantity).toFixed(2)}
+                    {formatCurrency(lineTotal(item.product.price, item.quantity))}
                   </span>
                 </div>
               ))}
@@ -161,7 +166,7 @@ export default function CartPage() {
               </div>
               <div className="border-t border-slate-100 pt-2.5 flex justify-between font-bold text-slate-900 text-base">
                 <span>Total</span>
-                <span>${cartTotal.toFixed(2)}</span>
+                <span>{formatCurrency(cartTotal)}</span>
               </div>
             </div>
             <LinkButton fullWidth size="lg" disabled={cartProblems.length > 0} to={'/checkout'}>
@@ -187,7 +192,7 @@ export default function CartPage() {
                   d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"
                 />
               </svg>
-              Secure, encrypted checkout
+              Demo checkout — no real charge
             </div>
           </div>
         </div>

@@ -1,3 +1,5 @@
+import { formatCurrency } from '@/shared/lib/format';
+import Image from '@/shared/ui/Image';
 import { useCart } from '@/features/cart/useCart';
 import { Link } from 'react-router';
 import type { Product } from '@/features/catalog/types';
@@ -26,7 +28,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         to={`/products/${encodeURIComponent(product.id)}`}
       />
       <div className="relative overflow-hidden bg-slate-50">
-        <img
+        <Image
           src={product.imageUrl}
           alt={product.name}
           className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
@@ -59,7 +61,9 @@ export default function ProductCard({ product }: ProductCardProps) {
           {product.description}
         </p>
         <div className="flex items-center justify-between gap-2">
-          <span className="text-base font-bold text-slate-900">${product.price.toFixed(2)}</span>
+          <span className="text-base font-bold text-slate-900">
+            {formatCurrency(product.price)}
+          </span>
           <Button
             size="sm"
             variant={outOfStock ? 'secondary' : 'primary'}

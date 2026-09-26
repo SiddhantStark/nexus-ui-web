@@ -1,3 +1,5 @@
+import { formatCurrency } from '@/shared/lib/format';
+import Image from '@/shared/ui/Image';
 import ScrollRegion from '@/shared/ui/ScrollRegion';
 import { usePagination } from '@/shared/hooks/usePagination';
 import StockStatusBadge from '@/features/inventory/components/StockStatusBadge';
@@ -160,7 +162,7 @@ export default function AdminProductsPage() {
                 <td className="px-5 py-3.5">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-lg overflow-hidden bg-slate-100 shrink-0">
-                      <img
+                      <Image
                         src={product.imageUrl}
                         alt={product.name}
                         className="w-full h-full object-cover"
@@ -174,7 +176,7 @@ export default function AdminProductsPage() {
                 </td>
                 <td className="px-5 py-3.5 text-sm text-slate-600">{product.category}</td>
                 <td className="px-5 py-3.5 font-semibold text-slate-900">
-                  ${product.price.toFixed(2)}
+                  {formatCurrency(product.price)}
                 </td>
                 <td className="px-5 py-3.5">
                   <span

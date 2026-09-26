@@ -1,3 +1,4 @@
+import Image from '@/shared/ui/Image';
 import ScrollRegion from '@/shared/ui/ScrollRegion';
 import { useErrorFocus } from '@/shared/hooks/useErrorFocus';
 import StockStatusBadge from '@/features/inventory/components/StockStatusBadge';
@@ -196,7 +197,7 @@ export default function InventoryPage() {
                   <td className="px-5 py-3.5">
                     <div className="flex items-center gap-3">
                       <div className="w-8 h-8 rounded-lg overflow-hidden bg-slate-100 shrink-0">
-                        <img
+                        <Image
                           src={product.imageUrl}
                           alt={product.name}
                           className="w-full h-full object-cover"

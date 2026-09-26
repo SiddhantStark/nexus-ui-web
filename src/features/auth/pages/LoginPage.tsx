@@ -69,10 +69,10 @@ export default function LoginPage() {
           </p>
           <div className="grid grid-cols-2 gap-4">
             {[
-              { stat: '12K+', label: 'Products listed' },
-              { stat: '98.4%', label: 'Payment success rate' },
-              { stat: '$2.4M', label: 'Monthly volume' },
-              { stat: '< 48h', label: 'Avg. refund time' },
+              { stat: 'Demo', label: 'Sample catalog' },
+              { stat: 'No charge', label: 'Simulated payments' },
+              { stat: 'In memory', label: 'Resets on refresh' },
+              { stat: 'Two roles', label: 'Customer and admin' },
             ].map(({ stat, label }) => (
               <div key={label} className="bg-white/10 rounded-xl p-4">
                 <p className="text-2xl font-bold" style={{ fontFamily: "'Outfit', sans-serif" }}>
@@ -83,7 +83,7 @@ export default function LoginPage() {
             ))}
           </div>
         </div>
-        <p className="text-indigo-300 text-sm">© 2024 NexusCommerce, Inc.</p>
+        <p className="text-indigo-300 text-sm">© {new Date().getFullYear()} NexusCommerce, Inc.</p>
       </div>
 
       {/* Right panel */}

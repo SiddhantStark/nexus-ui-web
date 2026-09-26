@@ -1,3 +1,6 @@
+import { lineTotal } from '@/shared/lib/money';
+import { formatCurrency, formatDate, formatDateTime } from '@/shared/lib/format';
+import Image from '@/shared/ui/Image';
 import ScrollRegion from '@/shared/ui/ScrollRegion';
 import { usePagination } from '@/shared/hooks/usePagination';
 import OrderStatusBadge from '@/features/orders/components/OrderStatusBadge';
@@ -167,14 +170,10 @@ export default function AdminOrdersPage() {
                   <p className="text-xs text-slate-500">{order.customerEmail}</p>
                 </td>
                 <td className="px-5 py-3.5 text-xs text-slate-500">
-                  {new Date(order.createdAt).toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric',
-                  })}
+                  {formatDate(order.createdAt)}
                 </td>
                 <td className="px-5 py-3.5 font-semibold text-slate-900">
-                  ${order.total.toFixed(2)}
+                  {formatCurrency(order.total)}
                 </td>
                 <td className="px-5 py-3.5">
                   <OrderStatusBadge status={order.orderStatus} />
@@ -221,10 +220,10 @@ export default function AdminOrdersPage() {
                   label: 'Payment',
                   value: <PaymentStatusBadge status={viewOrder.paymentStatus} size="md" />,
                 },
-                { label: 'Total', value: `$${viewOrder.total.toFixed(2)}` },
+                { label: 'Total', value: `${formatCurrency(viewOrder.total)}` },
                 {
                   label: 'Date',
-                  value: new Date(viewOrder.createdAt).toLocaleString(),
+                  value: formatDateTime(viewOrder.createdAt),
                 },
               ].map(({ label, value }) => (
                 <div key={label}>
@@ -238,7 +237,7 @@ export default function AdminOrdersPage() {
               {viewOrder.items.map((item) => (
                 <div key={item.productId} className="flex items-center gap-3 mb-2">
                   <div className="w-8 h-8 rounded bg-slate-100 overflow-hidden shrink-0">
-                    <img
+                    <Image
                       src={item.imageUrl}
                       alt={item.productName}
                       className="w-full h-full object-cover"
@@ -248,7 +247,7 @@ export default function AdminOrdersPage() {
                     {item.productName} ×{item.quantity}
                   </span>
                   <span className="text-sm font-semibold text-slate-900">
-                    ${(item.price * item.quantity).toFixed(2)}
+                    {formatCurrency(lineTotal(item.price, item.quantity))}
                   </span>
                 </div>
               ))}

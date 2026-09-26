@@ -1,3 +1,4 @@
+import { toCents, lineTotal, sumMoney } from '@/shared/lib/money';
 import type { CommerceState, CommerceStore } from '@/features/commerce/store';
 import type { Outcome } from '@/shared/lib/outcome';
 import type { Scenario } from '@/features/checkout/types';
@@ -70,12 +71,14 @@ export function createCommerceStore(seed: CommerceState = initialCommerce()): Co
       !Number.isInteger(product.stock) ||
       product.stock < 0 ||
       !Number.isFinite(product.price) ||
-      product.price < 0
+      product.price < 0 ||
+      !Number.isSafeInteger(toCents(product.price))
     ) {
       return fail(
         'Stock must be a nonnegative whole number and price must be finite and nonnegative.',
       );
     }
+    product = { ...product, price: toCents(product.price) / 100 };
     const products = state.products.some((p) => p.id === product.id)
       ? state.products.map((p) => (p.id === product.id ? product : p))
       : [product, ...state.products];
@@ -175,10 +178,11 @@ export function createCommerceStore(seed: CommerceState = initialCommerce()): Co
           productName: product.name,
           imageUrl: product.imageUrl,
           quantity: entry.quantity,
-          price: Math.round(product.price * 100) / 100,
+          price: toCents(product.price) / 100,
         };
       });
-      const total = items.reduce((sum, i) => sum + Math.round(i.price * 100) * i.quantity, 0) / 100;
+      const total = sumMoney(items.map((item) => lineTotal(item.price, item.quantity)));
+      if (!Number.isSafeInteger(toCents(total))) return fail('Order total exceeds the demo limit.');
       const order: Order = {
         id: orderId,
         customerId: user.id,

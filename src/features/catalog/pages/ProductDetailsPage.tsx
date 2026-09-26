@@ -1,3 +1,5 @@
+import { formatCurrency } from '@/shared/lib/format';
+import Image from '@/shared/ui/Image';
 import { useCart } from '@/features/cart/useCart';
 import { useCatalog } from '@/features/catalog/useCatalog';
 import LinkButton from '@/shared/ui/LinkButton';
@@ -56,7 +58,12 @@ export default function ProductDetailsPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-14">
         {/* Image */}
         <div className="relative bg-slate-100 rounded-2xl overflow-hidden aspect-[4/3]">
-          <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover" />
+          <Image
+            loading="eager"
+            src={product.imageUrl}
+            alt={product.name}
+            className="w-full h-full object-cover"
+          />
           {outOfStock && (
             <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
               <div className="bg-slate-800 text-white text-sm font-semibold px-5 py-2.5 rounded-full">
@@ -75,17 +82,10 @@ export default function ProductDetailsPage() {
         <div className="flex flex-col">
           <p className="text-xs text-slate-500 font-mono mb-2">SKU: {product.sku}</p>
           <h1 className="text-3xl font-bold text-slate-900 mb-2">{product.name}</h1>
-          <div className="flex items-center gap-2 mb-4">
-            <div className="flex text-amber-400">
-              {'★★★★'.split('').map((_, i) => (
-                <span key={i}>★</span>
-              ))}
-              <span className="text-slate-300">★</span>
-            </div>
-            <span className="text-sm text-slate-500">4.3 (128 reviews)</span>
-          </div>
-          <p className="text-3xl font-extrabold text-slate-900 mb-1">${product.price.toFixed(2)}</p>
-          <p className="text-sm text-slate-500 mb-4">Free shipping on this order</p>
+          <p className="text-3xl font-extrabold text-slate-900 mb-1">
+            {formatCurrency(product.price)}
+          </p>
+          <p className="text-sm text-slate-500 mb-4">Demo shipping has no delivery charge</p>
           <p className="text-sm text-slate-600 leading-relaxed mb-5">{product.description}</p>
 
           {/* Stock */}
@@ -153,9 +153,9 @@ export default function ProductDetailsPage() {
           {/* Trust */}
           <div className="flex gap-6 text-xs text-slate-500 border-t border-slate-100 pt-5">
             {[
-              { icon: '🔒', text: 'Secure checkout' },
-              { icon: '📦', text: 'Free 2-day shipping' },
-              { icon: '↩️', text: '30-day returns' },
+              { icon: '🔒', text: 'Simulated checkout' },
+              { icon: '📦', text: 'No real shipment' },
+              { icon: '↩️', text: 'Demo refunds' },
             ].map(({ icon, text }) => (
               <div key={text} className="flex items-center gap-1.5">
                 {icon}

@@ -1,3 +1,6 @@
+import { lineTotal } from '@/shared/lib/money';
+import { formatCurrency, formatDate } from '@/shared/lib/format';
+import Image from '@/shared/ui/Image';
 import OrderStatusBadge from '@/features/orders/components/OrderStatusBadge';
 import PaymentStatusBadge from '@/features/payments/components/PaymentStatusBadge';
 import { useSession } from '@/features/auth/SessionProvider';
@@ -57,13 +60,7 @@ export default function OrderSuccessPage() {
           </div>
           <div className="text-right">
             <p className="text-xs text-slate-500 mb-0.5">Placed on</p>
-            <p className="text-sm font-medium text-slate-900">
-              {new Date(order.createdAt).toLocaleDateString('en-US', {
-                weekday: 'short',
-                month: 'long',
-                day: 'numeric',
-              })}
-            </p>
+            <p className="text-sm font-medium text-slate-900">{formatDate(order.createdAt)}</p>
           </div>
         </div>
 
@@ -89,7 +86,7 @@ export default function OrderSuccessPage() {
           {order.items.map((item) => (
             <div key={item.productId} className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-lg overflow-hidden bg-slate-100 shrink-0">
-                <img
+                <Image
                   src={item.imageUrl}
                   alt={item.productName}
                   className="w-full h-full object-cover"
@@ -100,7 +97,7 @@ export default function OrderSuccessPage() {
                 <p className="text-xs text-slate-500">Quantity: {item.quantity}</p>
               </div>
               <span className="text-sm font-semibold text-slate-900 shrink-0">
-                ${(item.price * item.quantity).toFixed(2)}
+                {formatCurrency(lineTotal(item.price, item.quantity))}
               </span>
             </div>
           ))}
@@ -109,7 +106,9 @@ export default function OrderSuccessPage() {
         {/* Total */}
         <div className="bg-slate-50 border-t border-slate-100 px-6 py-4 flex justify-between items-center">
           <span className="text-sm font-semibold text-slate-700">Total Paid</span>
-          <span className="text-xl font-extrabold text-slate-900">${order.total.toFixed(2)}</span>
+          <span className="text-xl font-extrabold text-slate-900">
+            {formatCurrency(order.total)}
+          </span>
         </div>
       </div>
 

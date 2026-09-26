@@ -1,3 +1,6 @@
+import { sumMoney } from '@/shared/lib/money';
+import { formatCurrency } from '@/shared/lib/format';
+import Image from '@/shared/ui/Image';
 import OrderStatusBadge from '@/features/orders/components/OrderStatusBadge';
 import PaymentStatusBadge from '@/features/payments/components/PaymentStatusBadge';
 import TransactionStatusBadge from '@/features/payments/components/TransactionStatusBadge';
@@ -24,7 +27,7 @@ function StatCard({
         </div>
       </div>
       <p
-        className="text-2xl font-extrabold text-slate-900 mb-0.5"
+        className="text-2xl font-extrabold text-slate-900 mb-0.5 break-words"
         style={{ fontFamily: "'Outfit', sans-serif" }}
       >
         {value}
@@ -38,9 +41,9 @@ function StatCard({
 export default function AdminDashboard() {
   const { orders, transactions, refunds, products } = useDashboard();
 
-  const totalRevenue = transactions
-    .filter((t) => t.type === 'payment' && t.status === 'success')
-    .reduce((s, t) => s + t.amount, 0);
+  const totalRevenue = sumMoney(
+    transactions.filter((t) => t.type === 'payment' && t.status === 'success').map((t) => t.amount),
+  );
   const successPayments = transactions.filter(
     (t) => t.type === 'payment' && t.status === 'success',
   ).length;
@@ -66,7 +69,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6 gap-4 mb-8">
         <StatCard
           label="Total Orders"
           value={orders.length}
@@ -90,7 +93,7 @@ export default function AdminDashboard() {
         />
         <StatCard
           label="Total Revenue"
-          value={`$${totalRevenue.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`}
+          value={formatCurrency(totalRevenue)}
           sub="Confirmed payments"
           icon={
             <svg
@@ -207,7 +210,7 @@ export default function AdminDashboard() {
                 <div className="min-w-0">
                   <p className="text-xs font-mono font-semibold text-indigo-600">{order.id}</p>
                   <p className="text-xs text-slate-500 mt-0.5">
-                    {order.customerName} · ${order.total.toFixed(2)}
+                    {order.customerName} · {formatCurrency(order.total)}
                   </p>
                 </div>
                 <div className="flex gap-1.5 shrink-0">
@@ -240,7 +243,8 @@ export default function AdminDashboard() {
                       tx.type === 'refund' ? 'text-violet-600' : 'text-slate-900'
                     }`}
                   >
-                    {tx.type === 'refund' ? '+' : ''}${tx.amount.toFixed(2)}
+                    {tx.type === 'refund' ? '+' : ''}
+                    {formatCurrency(tx.amount)}
                   </span>
                   <TransactionStatusBadge status={tx.status} />
                 </div>
@@ -276,7 +280,7 @@ export default function AdminDashboard() {
                 className="flex items-center gap-3 bg-white rounded-lg p-3 border border-amber-100"
               >
                 <div className="w-8 h-8 rounded-lg overflow-hidden bg-slate-100 shrink-0">
-                  <img src={p.imageUrl} alt={p.name} className="w-full h-full object-cover" />
+                  <Image src={p.imageUrl} alt={p.name} className="w-full h-full object-cover" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="text-xs font-medium text-slate-900 truncate">{p.name}</p>

@@ -1,3 +1,5 @@
+import { sumMoney } from '@/shared/lib/money';
+import { formatCurrency, formatDate, formatTime } from '@/shared/lib/format';
 import ScrollRegion from '@/shared/ui/ScrollRegion';
 import { usePagination } from '@/shared/hooks/usePagination';
 import TransactionTypeBadge from '@/features/payments/components/TransactionTypeBadge';
@@ -27,16 +29,16 @@ export default function AdminTransactionsPage() {
   const { page, totalPages, setPage } = usePagination(filtered.length, PER_PAGE);
   const paginated = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
-  const totalVolume = transactions
-    .filter((t) => t.status === 'success')
-    .reduce((s, t) => s + t.amount, 0);
+  const totalVolume = sumMoney(
+    transactions.filter((t) => t.status === 'success').map((t) => t.amount),
+  );
 
   return (
     <div className="animate-fade-in">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-slate-900">Transactions</h1>
         <p className="text-sm text-slate-500 mt-0.5">
-          {transactions.length} transactions · Total volume: ${totalVolume.toFixed(2)}
+          {transactions.length} transactions · Total volume: {formatCurrency(totalVolume)}
         </p>
       </div>
 
@@ -179,25 +181,17 @@ export default function AdminTransactionsPage() {
                       tx.type === 'refund' ? 'text-violet-700' : 'text-slate-900'
                     }`}
                   >
-                    {tx.type === 'refund' ? '+' : ''}${tx.amount.toFixed(2)}
+                    {tx.type === 'refund' ? '+' : ''}
+                    {formatCurrency(tx.amount)}
                   </span>
                 </td>
                 <td className="px-5 py-4">
                   <TransactionStatusBadge status={tx.status} />
                 </td>
                 <td className="px-5 py-4 text-xs text-slate-500">
-                  {new Date(tx.createdAt).toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric',
-                  })}
+                  {formatDate(tx.createdAt)}
                   <br />
-                  <span className="text-slate-500">
-                    {new Date(tx.createdAt).toLocaleTimeString('en-US', {
-                      hour: '2-digit',
-                      minute: '2-digit',
-                    })}
-                  </span>
+                  <span className="text-slate-500">{formatTime(tx.createdAt)}</span>
                 </td>
               </tr>
             ))}

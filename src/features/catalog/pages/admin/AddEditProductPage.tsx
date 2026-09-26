@@ -1,3 +1,4 @@
+import Image from '@/shared/ui/Image';
 import { useErrorFocus } from '@/shared/hooks/useErrorFocus';
 import { useCatalog } from '@/features/catalog/useCatalog';
 import LinkButton from '@/shared/ui/LinkButton';
@@ -108,11 +109,10 @@ export default function AddEditProductPage() {
         {/* Preview */}
         {form.imageUrl && (
           <div className="aspect-video bg-slate-100 rounded-xl overflow-hidden mb-2">
-            <img
+            <Image
               src={form.imageUrl}
               alt="Product preview"
               className="w-full h-full object-cover"
-              onError={(e) => (e.currentTarget.style.display = 'none')}
             />
           </div>
         )}

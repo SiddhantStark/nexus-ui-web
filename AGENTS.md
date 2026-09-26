@@ -6,7 +6,7 @@ React + TypeScript + Vite + Tailwind CSS frontend exported from Figma Make; supp
 
 Do not assume a server is running. Start `pnpm dev` when needed; `$PORT` defaults to 8443. Use `corepack pnpm` if pnpm is not on PATH.
 
-- Local URL: `http://localhost:8443`; Figma-hosted sessions may provide a preview panel.
+- Local URL: `http://127.0.0.1:8443`; use `PORT` for a different port. Figma Make support has been removed.
 - Hot reload: Changes to source files are reflected immediately
 
 ## Project Structure
@@ -27,7 +27,7 @@ This is the canonical project structure. Start with task-relevant files below. O
 - `src/styles/index.css` - Global CSS entrypoint and Tailwind CSS v4 import
 - `index.html` - Vite HTML shell containing the `#root` element and loading `src/main.tsx`
 - `package.json` - Project dependencies and the Vite build, development, preview, and formatting scripts
-- `vite.config.ts` - Vite configuration with React, Tailwind CSS v4, and Figma Make plugins plus the `@` alias for `src`
+- `vite.config.ts` - Standalone Vite configuration with React, Tailwind CSS v4, and the `@` alias for `src`
 - `.mise.toml` - Toolchain versions for Node.js and pnpm
 
 ## Dependencies
@@ -45,7 +45,7 @@ This project uses **Tailwind CSS v4** through the `@tailwindcss/vite` plugin con
 
 ## Commands
 
-Use pnpm 10.34.3 and the single pnpm lockfile. Install with `pnpm install --frozen-lockfile`. Run `pnpm format:check`, `pnpm lint`, `pnpm typecheck`, `pnpm test`, and `pnpm build` before completing code changes. `pnpm build` checks TypeScript before bundling. Formatting targets source and JS/TS config; Figma-managed files are excluded. See README.md for runtime prerequisites and demo limitations.
+Use pnpm 10.34.3 and the single pnpm lockfile. Install with `pnpm install --frozen-lockfile`. Run `pnpm format:check`, `pnpm lint`, `pnpm typecheck`, `pnpm test`, and `pnpm build` before completing code changes. `pnpm build` checks TypeScript before bundling. Formatting targets source, JS/TS config, README, and this guide. See README.md for runtime prerequisites and demo limitations.
 
 ## Code quality
 
@@ -70,3 +70,11 @@ Use the shared Input/Select/Textarea for visible labels and associated helper/er
 Wrap wide tables in shared ScrollRegion with a meaningful label and column header scopes. Keep the surrounding flex/grid children shrinkable; fix page overflow rather than hiding it on the body. Use usePagination for local lists that can shrink; shareable catalog pagination remains in the URL. Preserve visible focus styles and the reduced-motion override. See docs/accessibility.md for the manual checks to repeat.
 
 Use `src/test/checkAccessibility.ts` for representative axe-core checks. Its jsdom run deliberately excludes color contrast; inspect actual rendered colors and responsive layouts in a browser. Automated rules do not establish complete accessibility compliance. The two targeted lint exceptions cover a keyboard-scrollable region and a bubbling Escape handler on the header; do not disable accessibility rules globally.
+
+## Resilience conventions
+
+Figma Make round-tripping was explicitly removed in Phase 7. Keep metadata in index.html and the demo crawler policy in public/robots.txt; do not restore the exported preview plugins. Use PUBLIC_BASE_PATH for non-root builds and DEV_SERVER_HOST only when intentionally changing the loopback bind.
+
+Declare React.lazy pages at module scope in app/router.tsx. Preserve the loading screen and route/application error boundaries. Rejected lazy imports need a full reload to retry; explain the demo reset rather than repeatedly retrying a cached rejection. Keep async operation failures in their existing explicit Outcome/notification path.
+
+Use shared/lib/format.ts for USD and en-US date/time display (viewer-local time zone), shared/lib/money.ts for cents arithmetic, and shared/ui/Image for image fallbacks. Preserve image container dimensions. Historical fixture IDs/timestamps are deliberate reference data, not current activity. Architecture checks include dynamic imports. See docs/frontend-resilience.md for Phase 7 decisions and verification.

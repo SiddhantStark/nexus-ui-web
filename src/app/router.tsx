@@ -1,5 +1,8 @@
 import { useSession } from '@/features/auth/SessionProvider';
-import { useEffect } from 'react';
+import { useEffect, lazy, Suspense } from 'react';
+import ErrorBoundary from '@/shared/ui/ErrorBoundary';
+import RecoveryScreen from '@/app/RecoveryScreen';
+import RouteLoading from '@/app/RouteLoading';
 import { Routes, Route, Navigate, Outlet, Link, useLocation, useParams } from 'react-router';
 import CustomerLayout from '@/app/layouts/CustomerLayout';
 import AdminLayout from '@/app/layouts/AdminLayout';
@@ -8,24 +11,28 @@ import LoginPage from '@/features/auth/pages/LoginPage';
 import RegisterPage from '@/features/auth/pages/RegisterPage';
 
 // Customer
-import HomePage from '@/features/catalog/pages/HomePage';
-import ProductListingPage from '@/features/catalog/pages/ProductListingPage';
-import ProductDetailsPage from '@/features/catalog/pages/ProductDetailsPage';
-import CartPage from '@/features/cart/pages/CartPage';
-import CheckoutPage from '@/features/checkout/pages/CheckoutPage';
-import OrderSuccessPage from '@/features/orders/pages/OrderSuccessPage';
-import MyOrdersPage from '@/features/orders/pages/MyOrdersPage';
-import OrderDetailsPage from '@/features/orders/pages/OrderDetailsPage';
-import TransactionHistoryPage from '@/features/payments/pages/TransactionHistoryPage';
+const HomePage = lazy(() => import('@/features/catalog/pages/HomePage'));
+const ProductListingPage = lazy(() => import('@/features/catalog/pages/ProductListingPage'));
+const ProductDetailsPage = lazy(() => import('@/features/catalog/pages/ProductDetailsPage'));
+const CartPage = lazy(() => import('@/features/cart/pages/CartPage'));
+const CheckoutPage = lazy(() => import('@/features/checkout/pages/CheckoutPage'));
+const OrderSuccessPage = lazy(() => import('@/features/orders/pages/OrderSuccessPage'));
+const MyOrdersPage = lazy(() => import('@/features/orders/pages/MyOrdersPage'));
+const OrderDetailsPage = lazy(() => import('@/features/orders/pages/OrderDetailsPage'));
+const TransactionHistoryPage = lazy(
+  () => import('@/features/payments/pages/TransactionHistoryPage'),
+);
 
 // Admin
-import AdminDashboard from '@/features/dashboard/pages/AdminDashboard';
-import AdminProductsPage from '@/features/catalog/pages/admin/AdminProductsPage';
-import AddEditProductPage from '@/features/catalog/pages/admin/AddEditProductPage';
-import InventoryPage from '@/features/inventory/pages/InventoryPage';
-import AdminOrdersPage from '@/features/orders/pages/admin/AdminOrdersPage';
-import AdminTransactionsPage from '@/features/payments/pages/admin/AdminTransactionsPage';
-import AdminRefundsPage from '@/features/refunds/pages/AdminRefundsPage';
+const AdminDashboard = lazy(() => import('@/features/dashboard/pages/AdminDashboard'));
+const AdminProductsPage = lazy(() => import('@/features/catalog/pages/admin/AdminProductsPage'));
+const AddEditProductPage = lazy(() => import('@/features/catalog/pages/admin/AddEditProductPage'));
+const InventoryPage = lazy(() => import('@/features/inventory/pages/InventoryPage'));
+const AdminOrdersPage = lazy(() => import('@/features/orders/pages/admin/AdminOrdersPage'));
+const AdminTransactionsPage = lazy(
+  () => import('@/features/payments/pages/admin/AdminTransactionsPage'),
+);
+const AdminRefundsPage = lazy(() => import('@/features/refunds/pages/AdminRefundsPage'));
 
 function RequireSession() {
   const { currentUser } = useSession();
@@ -76,37 +83,52 @@ export default function AppRoutes() {
     window.scrollTo({ top: 0 });
   }, [pathname]);
   return (
-    <Routes>
-      <Route path="login" element={<LoginPage />} />
-      <Route path="register" element={<RegisterPage />} />
-      <Route element={<RequireSession />}>
-        <Route element={<CustomerLayout />}>
-          <Route index element={<HomePage />} />
-          <Route path="products" element={<ProductListingPage />} />
-          <Route path="products/:productId" element={<ProductRoute />} />
-          <Route path="cart" element={<CartPage />} />
-          <Route path="checkout" element={<CheckoutPage />} />
-          <Route path="orders" element={<MyOrdersPage />} />
-          <Route path="orders/:orderId" element={<OrderRoute />} />
-          <Route path="orders/:orderId/success" element={<OrderRoute success />} />
-          <Route path="transactions" element={<TransactionHistoryPage />} />
-        </Route>
-        <Route path="admin" element={<RequireAdmin />}>
-          <Route element={<AdminLayout />}>
-            <Route index element={<AdminDashboard />} />
-            <Route path="products" element={<AdminProductsPage />} />
-            <Route path="products/new" element={<ProductFormRoute />} />
-            <Route path="products/:productId/edit" element={<ProductFormRoute />} />
-            <Route path="inventory" element={<InventoryPage />} />
-            <Route path="orders" element={<AdminOrdersPage />} />
-            <Route path="transactions" element={<AdminTransactionsPage />} />
-            <Route path="refunds" element={<AdminRefundsPage />} />
-            <Route path="*" element={<RouteMessage />} />
+    <ErrorBoundary
+      key={pathname}
+      fallback={
+        <RecoveryScreen
+          homeLink={
+            <Link className="text-indigo-700 underline" to="/">
+              Return to store
+            </Link>
+          }
+        />
+      }
+    >
+      <Suspense fallback={<RouteLoading />}>
+        <Routes>
+          <Route path="login" element={<LoginPage />} />
+          <Route path="register" element={<RegisterPage />} />
+          <Route element={<RequireSession />}>
+            <Route element={<CustomerLayout />}>
+              <Route index element={<HomePage />} />
+              <Route path="products" element={<ProductListingPage />} />
+              <Route path="products/:productId" element={<ProductRoute />} />
+              <Route path="cart" element={<CartPage />} />
+              <Route path="checkout" element={<CheckoutPage />} />
+              <Route path="orders" element={<MyOrdersPage />} />
+              <Route path="orders/:orderId" element={<OrderRoute />} />
+              <Route path="orders/:orderId/success" element={<OrderRoute success />} />
+              <Route path="transactions" element={<TransactionHistoryPage />} />
+            </Route>
+            <Route path="admin" element={<RequireAdmin />}>
+              <Route element={<AdminLayout />}>
+                <Route index element={<AdminDashboard />} />
+                <Route path="products" element={<AdminProductsPage />} />
+                <Route path="products/new" element={<ProductFormRoute />} />
+                <Route path="products/:productId/edit" element={<ProductFormRoute />} />
+                <Route path="inventory" element={<InventoryPage />} />
+                <Route path="orders" element={<AdminOrdersPage />} />
+                <Route path="transactions" element={<AdminTransactionsPage />} />
+                <Route path="refunds" element={<AdminRefundsPage />} />
+                <Route path="*" element={<RouteMessage />} />
+              </Route>
+            </Route>
+            <Route path="forbidden" element={<RouteMessage forbidden />} />
           </Route>
-        </Route>
-        <Route path="forbidden" element={<RouteMessage forbidden />} />
-      </Route>
-      <Route path="*" element={<RouteMessage />} />
-    </Routes>
+          <Route path="*" element={<RouteMessage />} />
+        </Routes>
+      </Suspense>
+    </ErrorBoundary>
   );
 }

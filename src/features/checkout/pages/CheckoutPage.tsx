@@ -1,3 +1,6 @@
+import { lineTotal } from '@/shared/lib/money';
+import { formatCurrency } from '@/shared/lib/format';
+import Image from '@/shared/ui/Image';
 import { useErrorFocus } from '@/shared/hooks/useErrorFocus';
 import { useSession } from '@/features/auth/SessionProvider';
 import { useCart } from '@/features/cart/useCart';
@@ -244,7 +247,7 @@ export default function CheckoutPage() {
               {cart.map((item) => (
                 <div key={item.product.id} className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-lg overflow-hidden bg-slate-50 shrink-0">
-                    <img
+                    <Image
                       src={item.product.imageUrl || undefined}
                       alt={item.product.name}
                       className="w-full h-full object-cover"
@@ -257,7 +260,7 @@ export default function CheckoutPage() {
                     <p className="text-xs text-slate-500">×{item.quantity}</p>
                   </div>
                   <span className="text-xs font-semibold text-slate-900 shrink-0">
-                    ${(item.product.price * item.quantity).toFixed(2)}
+                    {formatCurrency(lineTotal(item.product.price, item.quantity))}
                   </span>
                 </div>
               ))}
@@ -265,7 +268,7 @@ export default function CheckoutPage() {
             <div className="border-t border-slate-100 pt-3 flex flex-col gap-2 text-sm mb-4">
               <div className="flex justify-between text-slate-600">
                 <span>Subtotal</span>
-                <span>${cartTotal.toFixed(2)}</span>
+                <span>{formatCurrency(cartTotal)}</span>
               </div>
               <div className="flex justify-between text-slate-600">
                 <span>Shipping</span>
@@ -273,11 +276,11 @@ export default function CheckoutPage() {
               </div>
               <div className="flex justify-between font-bold text-slate-900 text-base border-t border-slate-100 pt-2">
                 <span>Total</span>
-                <span>${cartTotal.toFixed(2)}</span>
+                <span>{formatCurrency(cartTotal)}</span>
               </div>
             </div>
             <Button fullWidth size="lg" disabled={cartProblems.length > 0} type="submit">
-              Place Demo Order · ${cartTotal.toFixed(2)}
+              Place Demo Order · {formatCurrency(cartTotal)}
             </Button>
             <div className="mt-3 flex items-center justify-center gap-1.5 text-xs text-slate-500">
               <svg
@@ -293,7 +296,7 @@ export default function CheckoutPage() {
                   d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"
                 />
               </svg>
-              256-bit SSL encryption
+              Simulation only — no real charge
             </div>
           </div>
         </div>

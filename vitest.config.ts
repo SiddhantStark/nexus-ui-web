@@ -2,7 +2,7 @@ import { fileURLToPath } from 'node:url';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vitest/config';
 
-// Tests do not need Figma's preview server or HTML-generation plugins.
+// Tests need React transforms and jsdom, not production CSS bundling.
 export default defineConfig({
   plugins: [react()],
   resolve: {

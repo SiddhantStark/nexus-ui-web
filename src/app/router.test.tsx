@@ -42,6 +42,9 @@ async function signIn(user: ReturnType<typeof userEvent.setup>, admin = false) {
   await waitFor(() =>
     expect(screen.queryByRole('heading', { name: 'Sign in' })).not.toBeInTheDocument(),
   );
+  await waitFor(() =>
+    expect(screen.queryByRole('status', { name: 'Loading page' })).not.toBeInTheDocument(),
+  );
 }
 const location = () => screen.getByTestId('location').textContent;
 

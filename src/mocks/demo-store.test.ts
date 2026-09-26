@@ -268,3 +268,26 @@ describe('normalized cart and catalog operations', () => {
     expect(original.products[0].stock).toBe(2);
   });
 });
+
+it('normalizes edited prices and keeps fractional checkout, payment, and refund amounts aligned', () => {
+  const store = createCommerceStore(seed());
+  expect(store.saveProduct({ ...product, price: 1.005, stock: 3 }).success).toBe(true);
+  expect(store.getSnapshot().products[0].price).toBe(1.01);
+  store.addToCart(product.id, 3);
+  const result = store.checkout(
+    address,
+    customer,
+    store.getSnapshot().cartVersion,
+    'fractional',
+    'success',
+  );
+  expect(result.success).toBe(true);
+  if (!result.success) throw new Error(result.error);
+  expect(result.value.total).toBe(3.03);
+  expect(store.getSnapshot().transactions[0].amount).toBe(3.03);
+  store.cancelOrder(result.value.id, customer);
+  const refund = store.getSnapshot().refunds[0];
+  expect(refund.amount).toBe(3.03);
+  store.resolveRefund(refund.id, 'completed', admin);
+  expect(store.getSnapshot().transactions[0].amount).toBe(3.03);
+});

@@ -27,9 +27,21 @@ for (const file of files) {
   );
   const runtime: string[] = [];
   const all: string[] = [];
-  for (const node of source.statements) {
-    if (!ts.isImportDeclaration(node) || !ts.isStringLiteral(node.moduleSpecifier)) continue;
-    const specifier = node.moduleSpecifier.text;
+  const references: { specifier: string; clause?: ts.ImportClause }[] = [];
+  function collect(node: ts.Node) {
+    if (ts.isImportDeclaration(node) && ts.isStringLiteral(node.moduleSpecifier)) {
+      references.push({ specifier: node.moduleSpecifier.text, clause: node.importClause });
+    } else if (
+      ts.isCallExpression(node) &&
+      node.expression.kind === ts.SyntaxKind.ImportKeyword &&
+      ts.isStringLiteral(node.arguments[0])
+    ) {
+      references.push({ specifier: node.arguments[0].text });
+    }
+    ts.forEachChild(node, collect);
+  }
+  collect(source);
+  for (const { specifier, clause } of references) {
     const base = specifier.startsWith('@/')
       ? path.join(root, specifier.slice(2))
       : specifier.startsWith('.')
@@ -39,7 +51,6 @@ for (const file of files) {
     const target = [base, `${base}.ts`, `${base}.tsx`].find((candidate) => fileSet.has(candidate));
     if (!target) continue;
     all.push(target);
-    const clause = node.importClause;
     const bindings = clause?.namedBindings;
     const onlyTypes =
       clause?.isTypeOnly ||

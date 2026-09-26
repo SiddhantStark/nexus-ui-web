@@ -1,3 +1,5 @@
+import { formatCurrency, formatDate } from '@/shared/lib/format';
+import Image from '@/shared/ui/Image';
 import { usePagination } from '@/shared/hooks/usePagination';
 import OrderStatusBadge from '@/features/orders/components/OrderStatusBadge';
 import PaymentStatusBadge from '@/features/payments/components/PaymentStatusBadge';
@@ -93,7 +95,7 @@ export default function MyOrdersPage() {
                         key={item.productId}
                         className="w-10 h-10 rounded-lg overflow-hidden border-2 border-white bg-slate-100 shrink-0"
                       >
-                        <img
+                        <Image
                           src={item.imageUrl}
                           alt={item.productName}
                           className="w-full h-full object-cover"
@@ -110,13 +112,7 @@ export default function MyOrdersPage() {
                     <div className="flex items-center gap-2 mb-0.5">
                       <p className="font-bold text-slate-900 font-mono text-sm">{order.id}</p>
                     </div>
-                    <p className="text-xs text-slate-500">
-                      {new Date(order.createdAt).toLocaleDateString('en-US', {
-                        month: 'long',
-                        day: 'numeric',
-                        year: 'numeric',
-                      })}
-                    </p>
+                    <p className="text-xs text-slate-500">{formatDate(order.createdAt)}</p>
                     <p className="text-xs text-slate-500 mt-0.5">
                       {order.items.length} item
                       {order.items.length !== 1 ? 's' : ''} · {order.paymentMethod}
@@ -129,7 +125,9 @@ export default function MyOrdersPage() {
                     <PaymentStatusBadge status={order.paymentStatus} />
                   </div>
                   <div className="text-right">
-                    <p className="text-base font-bold text-slate-900">${order.total.toFixed(2)}</p>
+                    <p className="text-base font-bold text-slate-900">
+                      {formatCurrency(order.total)}
+                    </p>
                     <LinkButton
                       variant="outline"
                       size="sm"

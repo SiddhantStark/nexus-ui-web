@@ -15,9 +15,9 @@ corepack pnpm dev
 
 If Corepack is unavailable, install the pinned pnpm version using your normal Node toolchain and run `pnpm` directly. Do not use npm install or generate a second lockfile.
 
-The development URL defaults to `http://localhost:8443`. The server is not automatically started outside Figma Make. `PORT` overrides the port; strict port mode reports an error if it is already occupied. `FIGMA_DEV_SERVER_HOST=127.0.0.1` can restrict the default all-interface bind to localhost.
+The development URL defaults to `http://127.0.0.1:8443`. Start the server explicitly. `PORT` overrides the port; strict port mode reports an error if it is occupied. Development and preview bind to loopback by default. Set `DEV_SERVER_HOST` explicitly when access from another device is needed.
 
-Keep `.figma/make/site.json`: the Vite configuration uses it for HTML metadata. Figma preview plugins are retained during this tooling phase. No `.env` file or API credentials are required for the demo.
+Figma Make runtime support was removed in Phase 7 by project decision. Standard `index.html` now owns the title, language, description, Open Graph, and noindex metadata; `public/robots.txt` retains the demo crawl policy. The original design brief remains in `docs/design/`. No `.env` file or API credentials are required.
 
 ## Commands
 
@@ -34,7 +34,7 @@ Use `pnpm` below, or `corepack pnpm` if pnpm is not on your PATH.
 | `pnpm build`        | Typecheck, then create the production bundle in `dist/`  |
 | `pnpm preview`      | Serve an existing production build on port 8443          |
 
-Run formatting, lint, typecheck, tests, and build before submitting changes. The formatter covers source, project configuration, and frontend setup documentation. It excludes generated output, Figma-managed files, and the imported design brief. oxfmt was updated from 0.2.0 after that version was verified to remove required separators in inline TypeScript types.
+Run formatting, lint, typecheck, tests, and build before submitting changes. The formatter covers source, project configuration, and frontend setup documentation. It excludes generated output and the imported design brief. oxfmt was updated from 0.2.0 after that version was verified to remove required separators in inline TypeScript types.
 
 ESLint 9 is temporarily retained because eslint-plugin-jsx-a11y 6.10.2 declares peer support only through ESLint 9. npm marks ESLint 9 deprecated; upgrade to a supported ESLint major when the accessibility plugin supports it. No rules are disabled globally.
 
@@ -44,7 +44,7 @@ ESLint 9 is temporarily retained because eslint-plugin-jsx-a11y 6.10.2 declares 
 - `pnpm test:watch`: rerun affected tests while developing; press `q` to quit.
 - `pnpm test src/features/catalog/components/ProductCard.test.tsx`: run one test file.
 
-Vitest uses its own `vitest.config.ts`, React transforms, the `@` alias, and jsdom. It does not load the Figma preview plugins. jsdom 26 retains compatibility with the documented Node range; newer jsdom releases require higher Node patch versions.
+Vitest uses its own `vitest.config.ts`, React transforms, the `@` alias, and jsdom. jsdom 26 retains compatibility with the documented Node range; newer jsdom releases require higher Node patch versions.
 
 Place `*.test.ts` or `*.test.tsx` beside the component/feature being tested. Import `describe`, `it`, `expect`, and `vi` explicitly from Vitest. `src/test/setup.ts` installs jest-dom assertions, cleans up mounted components after each test, restores real timers, and stubs the scrolling API missing from jsdom. Vitest clears/restores mocks between tests.
 
@@ -77,7 +77,7 @@ See [route behavior and verification](docs/routing.md) for the route map and man
 
 Sign-in preserves a permitted internal destination in `next`; registration links retain it. Catalog URLs support `q`, `category`, `maxPrice`, `sort`, and `page`. Category, sort, and page changes create history entries; typing search/price replaces the current entry. Invalid filters fall back to defaults and page numbers are clamped to available results.
 
-A refresh or new tab resets the in-memory demo session/data and prompts for sign-in before returning to the requested URL. Newly created records disappear on refresh. Production hosting must serve `index.html` for application paths; hosting rewrite configuration is deferred to deployment. Vite development/preview supports SPA fallback. The router derives its base pathname from Vite's base URL, including Figma preview URLs.
+A refresh or new tab resets the in-memory demo session/data and prompts for sign-in before returning to the requested URL. Newly created records disappear on refresh. Production hosting must serve `index.html` for application paths; hosting rewrite configuration is deferred to deployment. Vite development/preview supports SPA fallback. The router derives its base pathname from Vite's base URL, including a deployment subpath set with `PUBLIC_BASE_PATH=/shop/ pnpm build`. The hosting server must use the same base path.
 
 Routing regression tests cover direct links, registration redirects, ownership, role guards, sign-out, browser history, missing records, query normalization, and safe post-login destinations. Layout and full browser workflow coverage remain separate from DOM tests.
 
@@ -98,7 +98,15 @@ Routing regression tests cover direct links, registration redirects, ownership, 
 
 Features do not import app composition or concrete mock implementations. Shared code does not import features or business state. The architecture tests check these boundaries and circular runtime imports. Cross-feature operations remain behind the commerce contract; no API or DTO layers have been scaffolded. See [frontend architecture](docs/frontend-architecture.md) for ownership and extension guidance.
 
-See [screen baseline](../docs/frontend-screen-baseline.md) and the [step-by-step improvement plan](../docs/frontend-improvement-plan.md). Phases 1–6 are implemented. See [accessibility and responsive usability](docs/accessibility.md) for Phase 6 behavior, verification, and extension guidance. Resilience, end-to-end testing/CI, and backend integration remain later work.
+See [screen baseline](../docs/frontend-screen-baseline.md) and the [step-by-step improvement plan](../docs/frontend-improvement-plan.md). Phases 1–7 are implemented. See [accessibility and responsive usability](docs/accessibility.md) for Phase 6 behavior, verification, and extension guidance. See [Phase 7 resilience and cleanup](docs/frontend-resilience.md) for page loading, error recovery, formatting, and image fallbacks. End-to-end testing/CI and backend integration remain later work.
+
+## Resilience and display conventions
+
+Customer and admin pages load on demand with an announced loading screen. Route errors display recovery actions; returning to the store keeps the demo provider state, while reloading resets it. A second error boundary protects application/provider failures. Error boundaries handle rendering and page imports, not asynchronous action failures; those still return explicit outcomes.
+
+Use `shared/lib/format.ts` for USD amounts and `en-US` dates/times in the viewer's local time zone. Use `shared/lib/money.ts` for cents-based arithmetic; product edits normalize unit prices before storage. Frontend types continue to expose USD major-unit amounts, and historical order snapshots remain unchanged. This is demo arithmetic, not an API or payment contract.
+
+Use shared Image for a named, fixed-space fallback on missing/broken sources. Product thumbnails load lazily; hero and product-detail images load eagerly. Preserve the caller's dimensions or aspect-ratio wrapper. A changed source retries automatically. Seed records retain their historical 2024 timestamps and IDs intentionally; displayed copyright years use the current year.
 
 ## Repository boundary
 

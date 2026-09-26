@@ -1,3 +1,6 @@
+import { lineTotal } from '@/shared/lib/money';
+import { formatCurrency, formatDate, formatDateTime } from '@/shared/lib/format';
+import Image from '@/shared/ui/Image';
 import OrderStatusBadge from '@/features/orders/components/OrderStatusBadge';
 import PaymentStatusBadge from '@/features/payments/components/PaymentStatusBadge';
 import TransactionStatusBadge from '@/features/payments/components/TransactionStatusBadge';
@@ -121,16 +124,14 @@ export default function OrderDetailsPage() {
                   label: 'Total Amount',
                   value: (
                     <span className="text-base font-bold text-slate-900">
-                      ${order.total.toFixed(2)}
+                      {formatCurrency(order.total)}
                     </span>
                   ),
                 },
                 {
                   label: 'Order Date',
                   value: (
-                    <span className="text-sm text-slate-700">
-                      {new Date(order.createdAt).toLocaleDateString()}
-                    </span>
+                    <span className="text-sm text-slate-700">{formatDate(order.createdAt)}</span>
                   ),
                 },
               ].map(({ label, value }) => (
@@ -151,7 +152,7 @@ export default function OrderDetailsPage() {
               {order.items.map((item) => (
                 <div key={item.productId} className="px-5 py-4 flex items-center gap-4">
                   <div className="w-14 h-14 rounded-lg overflow-hidden bg-slate-100 shrink-0">
-                    <img
+                    <Image
                       src={item.imageUrl}
                       alt={item.productName}
                       className="w-full h-full object-cover"
@@ -160,12 +161,12 @@ export default function OrderDetailsPage() {
                   <div className="flex-1">
                     <p className="text-sm font-semibold text-slate-900">{item.productName}</p>
                     <p className="text-xs text-slate-500 mt-0.5">
-                      Unit price: ${item.price.toFixed(2)}
+                      Unit price: {formatCurrency(item.price)}
                     </p>
                   </div>
                   <div className="text-right">
                     <p className="text-sm font-bold text-slate-900">
-                      ${(item.price * item.quantity).toFixed(2)}
+                      {formatCurrency(lineTotal(item.price, item.quantity))}
                     </p>
                     <p className="text-xs text-slate-500">×{item.quantity}</p>
                   </div>
@@ -175,7 +176,7 @@ export default function OrderDetailsPage() {
             <div className="bg-slate-50 border-t border-slate-100 px-5 py-3.5 flex justify-between">
               <span className="text-sm font-semibold text-slate-700">Total</span>
               <span className="text-base font-extrabold text-slate-900">
-                ${order.total.toFixed(2)}
+                {formatCurrency(order.total)}
               </span>
             </div>
           </div>
@@ -188,14 +189,14 @@ export default function OrderDetailsPage() {
                 {[
                   { label: 'Transaction ID', value: orderTx.id },
                   { label: 'Method', value: orderTx.method },
-                  { label: 'Amount', value: `$${orderTx.amount.toFixed(2)}` },
+                  { label: 'Amount', value: `${formatCurrency(orderTx.amount)}` },
                   {
                     label: 'Status',
                     value: <TransactionStatusBadge status={orderTx.status} />,
                   },
                   {
                     label: 'Date',
-                    value: new Date(orderTx.createdAt).toLocaleString(),
+                    value: formatDateTime(orderTx.createdAt),
                   },
                 ].map(({ label, value }) => (
                   <div key={label}>
@@ -250,7 +251,7 @@ export default function OrderDetailsPage() {
             <h2 className="text-sm font-semibold text-slate-700 mb-3">Payment</h2>
             <p className="text-sm text-slate-600">{order.paymentMethod}</p>
             <p className="text-xs text-slate-500 mt-1">
-              Order placed {new Date(order.createdAt).toLocaleDateString()}
+              Order placed {formatDate(order.createdAt)}
             </p>
           </div>
 
@@ -281,7 +282,7 @@ export default function OrderDetailsPage() {
       <ConfirmDialog
         open={showRefundDialog}
         title="Request a refund?"
-        message={`You are requesting a refund of $${order.total.toFixed(2)} for order ${order.id}. Please provide a reason below.`}
+        message={`You are requesting a refund of ${formatCurrency(order.total)} for order ${order.id}. Please provide a reason below.`}
         confirmLabel="Submit Refund Request"
         variant="primary"
         onConfirm={handleRefundRequest}

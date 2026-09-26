@@ -75,8 +75,10 @@ export default function CustomerLayout() {
             ))}
           </div>
           <div className="border-t border-slate-800 pt-6 flex flex-col md:flex-row items-center justify-between gap-2">
-            <p className="text-xs">© 2024 NexusCommerce, Inc. All rights reserved.</p>
-            <p className="text-xs">Secure payments · Fast delivery · Easy returns</p>
+            <p className="text-xs">
+              © {new Date().getFullYear()} NexusCommerce, Inc. All rights reserved.
+            </p>
+            <p className="text-xs">Demo catalog · Simulated payments · Session-only data</p>
           </div>
         </div>
       </footer>
