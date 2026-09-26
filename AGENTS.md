@@ -78,3 +78,11 @@ Figma Make round-tripping was explicitly removed in Phase 7. Keep metadata in in
 Declare React.lazy pages at module scope in app/router.tsx. Preserve the loading screen and route/application error boundaries. Rejected lazy imports need a full reload to retry; explain the demo reset rather than repeatedly retrying a cached rejection. Keep async operation failures in their existing explicit Outcome/notification path.
 
 Use shared/lib/format.ts for USD and en-US date/time display (viewer-local time zone), shared/lib/money.ts for cents arithmetic, and shared/ui/Image for image fallbacks. Preserve image container dimensions. Historical fixture IDs/timestamps are deliberate reference data, not current activity. Architecture checks include dynamic imports. See docs/frontend-resilience.md for Phase 7 decisions and verification.
+
+## Browser regression tests and CI
+
+Playwright tests live in `e2e/`, with shared browser helpers in `e2e/fixtures.ts` and production preview configuration in `playwright.config.ts`. Run `pnpm exec playwright install chromium` once, then `pnpm test:e2e` for affected browser flows before completing frontend changes. The suite owns port 8458 and builds a fresh production bundle; do not reuse an arbitrary running preview. Browser tests/config are included in formatting, lint, and type checks.
+
+Every test gets a fresh browser context and app mount. Use UI sign-in, semantic locators, and condition-based assertions; do not inject commerce state or depend on another test's mutations. Use client-side links within a flow because full navigation resets demo state. External image/font requests are blocked for deterministic runs. The customer access test changes browser history to exercise a mounted route guard without losing the in-memory session. No test-only production hooks are needed.
+
+The GitHub workflow belongs to this frontend repository root, not its parent workspace. See docs/frontend-testing.md for commands, CI behavior, coverage, and deferred integrations.
